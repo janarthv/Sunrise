@@ -23,7 +23,7 @@ namespace Sunrise
             DateTime from = new DateTime(year: 2019, month: 4, day: 4, hour: 0, minute: 0, second: 0, millisecond: 0, kind: DateTimeKind.Utc);
             DateTime to = new DateTime(year: 2019, month: 4, day: 5, hour: 0, minute: 0, second: 0, millisecond: 0, kind: DateTimeKind.Utc);
 
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Hello Worlds!");
         }
     }
 }
