@@ -1,0 +1,4 @@
+C:\Users\vja\Documents\examples\core\Sunrise\Sunrise\obj\Debug\netcoreapp2.1\Sunrise.csprojAssemblyReference.cache
+C:\Users\vja\Documents\examples\core\Sunrise\Sunrise\obj\Debug\netcoreapp2.1\Sunrise.csproj.CoreCompileInputs.cache
+C:\Users\vja\Documents\examples\core\Sunrise\Sunrise\obj\Debug\netcoreapp2.1\Sunrise.AssemblyInfoInputs.cache
+C:\Users\vja\Documents\examples\core\Sunrise\Sunrise\obj\Debug\netcoreapp2.1\Sunrise.AssemblyInfo.cs
