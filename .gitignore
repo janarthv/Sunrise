@@ -11,3 +11,5 @@ Sunrise/Sunrise/obj/Debug/netcoreapp2.1/Sunrise.csprojAssemblyReference.cache
 .DS_Store
 *.ide-wal
 *.ide-wal
+.vs/Sunrise/xs/UserPrefs.xml
+*.ide-shm
