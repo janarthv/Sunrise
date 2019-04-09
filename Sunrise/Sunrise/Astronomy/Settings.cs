@@ -8,7 +8,7 @@ namespace Sunrise.Astronomy
     {
         public static void SetEarthBased()
         {
-            Sunrise.Settings.ReferenceOrigin = Origin.Earth;
+            Sunrise.Settings.ReferenceOrigin = Body.Earth;
         }
     }
 }

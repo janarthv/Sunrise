@@ -14,7 +14,7 @@ namespace Sunrise.CelestialObjects
 
         public override void GetState(State state)
         {
-            if (state.Origin != Origin.Sun)
+            if (state.Origin != Body.Sun)
             {
                 
             }

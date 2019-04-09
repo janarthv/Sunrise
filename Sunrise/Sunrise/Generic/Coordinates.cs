@@ -19,7 +19,7 @@ namespace Sunrise.Generic
     public abstract class BasicCoordinates
     {
         public Frame Frame { get; set; }
-        public Origin Origin { get; set; }
+        public Body Origin { get; set; }
     }
 
     public class KeplerianCoordinates : BasicCoordinates
@@ -34,7 +34,7 @@ namespace Sunrise.Generic
         public KeplerianCoordinates()
         {
             Frame = Frame.EME2000;
-            Origin = Origin.Sun;
+            Origin = Body.Sun;
             SMA = 0D;
             Ecc = 0D;
             Inc = 0D;
@@ -43,7 +43,7 @@ namespace Sunrise.Generic
             TA = 0D;
         }
 
-        public KeplerianCoordinates(double sma, double ecc, double inc, double raan, double argPer, double ta, Frame frame, Origin origin)
+        public KeplerianCoordinates(double sma, double ecc, double inc, double raan, double argPer, double ta, Frame frame, Body origin)
         {
             SMA = sma;
             Ecc = ecc;
@@ -110,12 +110,12 @@ namespace Sunrise.Generic
         public CartesianCoordinates()
         {
             Frame = Frame.EME2000;
-            Origin = Origin.Sun;
+            Origin = Body.Sun;
             Position = new Position();
             Velocity = new Velocity();
         }
 
-        public CartesianCoordinates(Position position, Velocity velocity, Frame frame, Origin origin)
+        public CartesianCoordinates(Position position, Velocity velocity, Frame frame, Body origin)
         {
             Frame = frame;
             Origin = origin;

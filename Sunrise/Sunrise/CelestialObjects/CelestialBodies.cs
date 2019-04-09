@@ -18,34 +18,6 @@ namespace Sunrise.CelestialObjects
         public double MU { get; set; }      // Units in km3/s2
         public IEnumerable<Frame> Frames { get; set; }
 
-        public void GetState(State state)
-        {
-            state.CheckValidity();
-            if (Name == Body.Sun)
-            {
-                if (state.Coordinates.Type == CoordinateType.Cartesian)
-                {
-                    Body origin = state.Coordinates.CartesianCoordinates.Origin;
-                    if (origin == Body.Sun)
-                    {
-                        state.Coordinates.CartesianCoordinates = new CartesianCoordinates
-                        {
-                            Position = new Position(),
-                            Velocity = new Velocity(),
-                        };
-                    }
-                    else
-                    {
-                        GetHelioCentricState(origin);
-                    }
-                }
-            }
-        }
-
-        private void GetHelioCentricState(Body origin)
-        {
-            throw new NotImplementedException();
-        }
     }
 
     public static partial class CelestialBodies

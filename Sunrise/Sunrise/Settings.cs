@@ -5,6 +5,6 @@ namespace Sunrise
 {
     public static class Settings
     {
-        public static Origin ReferenceOrigin {get;set;}
+        public static Body ReferenceOrigin {get;set;}
     }
 }

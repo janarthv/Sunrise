@@ -2,7 +2,7 @@
 
 using Sunrise.Generic;
 using Sunrise.Generic.Frames;
-using Type = Sunrise.Generic.Type;
+using CoordinateType = Sunrise.Generic.CoordinateType;
 
 namespace Sunrise
 {
@@ -16,8 +16,8 @@ namespace Sunrise
                 Epoch = new DateTime(year: 2019, month: 4, day: 4, hour: 0, minute: 0, second: 0, millisecond: 0, kind: DateTimeKind.Utc),
                 Coordinates = new Coordinates
                 {
-                    Type = Type.Keplerian,
-                    Keplerian = new Keplerian(),
+                    Type = CoordinateType.Keplerian,
+                    Keplerian = new KeplerianCoordinates(),
                 },
             };
             DateTime from = new DateTime(year: 2019, month: 4, day: 4, hour: 0, minute: 0, second: 0, millisecond: 0, kind: DateTimeKind.Utc);
