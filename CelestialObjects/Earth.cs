@@ -1,14 +1,18 @@
-﻿using MathNet.Numerics.LinearAlgebra;
+﻿using System;
+using MathNet.Numerics.LinearAlgebra;
 using Sunrise.Generic;
+using Sunrise.Generic.Frames;
+using Sunrise.Math;
 
 namespace Sunrise.CelestialObjects
 {
-    public static class Earth
+    public class Earth
     {
-        public static void GetHelioCentricState(State state,Depth depth)
+        public CoordinatesNeeded CoordinatesNeeded { get; set; }
+        public void GetHelioCentricState(State state,Depth depth)
         {
             Coordinates coordinates = state.Coordinates;
-            if (coordinates.IsKeplerianCoordinatesNeeded )
+            if (CoordinatesNeeded.Keplerian)
             {
                 coordinates.KeplerianCoordinates = new KeplerianCoordinates
                 {
@@ -16,7 +20,7 @@ namespace Sunrise.CelestialObjects
                 };
                 //FIXME Implement logic using coordinate frame from input
             }
-            if (state.Coordinates.IsCartesianCoordinatesNeeded)
+            if (CoordinatesNeeded.Cartesian)
             {
                 state.Coordinates.CartesianCoordinates = new CartesianCoordinates
                 {
@@ -27,22 +31,19 @@ namespace Sunrise.CelestialObjects
             }
         }
 
-        internal static void GetBodyCentricState(Body body, State state)
+        public void GetBodyCentricState(Body body, State state)
         {
             BodyCentricCoordinates bodyCentricCoordinates = state.Coordinates.BodyCentricCoordinates;
         }
-    }
-}
 
-/*
- *             State = new State
+        private void GetHelioCentricKeplerianElements(DateTime epoch)
+        {
+            State state = new State
             {
-                Epoch = new DateTime(),
-                Frame = Frame.EME2000,
+                Epoch = new DateTime(2000, 1, 1, 12, 0, 0, 0, DateTimeKind.Utc),
                 Coordinates = new Coordinates
                 {
-                    Type = Type.Keplerian,
-                    Keplerian = new Keplerian
+                    KeplerianCoordinates = new KeplerianCoordinates
                     {
                         SMA = 1.00000011 * Constants.AU,
                         Ecc = 0.01671022,
@@ -50,8 +51,13 @@ namespace Sunrise.CelestialObjects
                         RAAN = BasicMath.DegreeToRadian(-11.26064),
                         ArgPer = BasicMath.DegreeToRadian(102.94719),
                         TA = BasicMath.DegreeToRadian(100.46435),
+                        CoordinateFrame = Frame.EME2000,
+                        Origin = Body.Sun,
                     },
                 },
-                Origin = Origin.Sun,
-            },
- */
+            };
+            return state.Coordinates.KeplerianCoordinates;
+        }
+    }
+}
+

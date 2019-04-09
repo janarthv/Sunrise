@@ -24,6 +24,10 @@ namespace Sunrise.CelestialObjects
         public CoordinatesNeeded CoordinatesNeeded { get; set; }
         public void GetState(Body body, State state, Depth depth)
         {
+            if (CoordinatesNeeded == null)
+            {
+                throw new ArgumentNullException();
+            }
             state.CheckValidity();
             Coordinates stateCoordinates = state.Coordinates;
             if (body == Body.Sun)
@@ -69,7 +73,7 @@ namespace Sunrise.CelestialObjects
                         }
                     }
                 }
-                if (stateCoordinates.IsBodyCentricCoordinatesNeeded)
+                if (CoordinatesNeeded.BodyCentric)
                 {
                     BodyCentricCoordinates bodyCentricCoordinates = stateCoordinates.BodyCentricCoordinates;
                     if (bodyCentricCoordinates == null || bodyCentricCoordinates.CentreBody == null || bodyCentricCoordinates.BodyFrame == null)
@@ -91,9 +95,13 @@ namespace Sunrise.CelestialObjects
             {
                 throw new InvalidOperationException();
             }
-            else if (body == Body.Earth)
+            if (body == Body.Earth)
             {
-                Earth.GetHelioCentricState(state, depth);
+                Earth earth = new Earth
+                {
+                    CoordinatesNeeded = CoordinatesNeeded,
+                };
+                earth.GetHelioCentricState(state, depth);
             }
             else
             {
@@ -105,7 +113,11 @@ namespace Sunrise.CelestialObjects
         {
             if (centreBody == Body.Earth)
             {
-                Earth.GetBodyCentricState(body, state);
+                Earth earth = new Earth
+                {
+                    CoordinatesNeeded = CoordinatesNeeded,
+                };
+                earth.GetBodyCentricState(body, state);
             }
             else
             {

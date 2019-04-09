@@ -115,8 +115,8 @@ namespace Sunrise.Generic
             IsValid = true;
             CoordinateFrame = Frame.EME2000;
             Origin = Body.Sun;
-            Position = Vector<double>.Build.Dense(3);
-            Velocity = Vector<double>.Build.Dense(3);
+            //Position = Vector<double>.Build.Dense(3);
+            //Velocity = Vector<double>.Build.Dense(3);
         }
 
         public CartesianCoordinates(Vector<double> position, Vector<double> velocity, Frame frame, Body origin)
@@ -134,8 +134,14 @@ namespace Sunrise.Generic
 
         public void Negative()
         {
-            _pos = -_pos;
-            _vel = -_vel;
+            if (_pos != null)
+            {
+                _pos = -_pos;
+            }
+            if (_vel != null)
+            {
+                _vel = -_vel;
+            }
         }
     }
 

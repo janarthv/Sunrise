@@ -38,14 +38,18 @@ namespace Sunrise.Astronomy.RiseSet
                         {
                             Origin = Body.Earth,
                             CoordinateFrame = Frame.EME2000,
-                        }
+                        },
                     },
                 };
-                GenericStateRetriever = new StateRetriever
+                StateRetriever stateRetriever = new StateRetriever
                 {
-
+                    CoordinatesNeeded = new CoordinatesNeeded
+                    {
+                        Cartesian = true,
+                    },
                 };
-                GetState(Body.Sun, state, Depth.Position);
+                stateRetriever.GetState(Body.Sun, state, Depth.Position);
+                //stateRetriever.GetHelioCentricState(Body.Earth, state, Depth.Position);
                 //State bodyState = new State
                 //{
                 //    Epoch = date,
