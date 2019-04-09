@@ -9,4 +9,7 @@
     <PackageReference Include="MathNet.Numerics" Version="4.7.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="CelestialObjects\Sun.cs" />
+  </ItemGroup>
 </Project>
