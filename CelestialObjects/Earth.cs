@@ -1,4 +1,4 @@
-﻿using System;
+﻿using MathNet.Numerics.LinearAlgebra;
 using Sunrise.Generic;
 
 namespace Sunrise.CelestialObjects
@@ -21,19 +21,15 @@ namespace Sunrise.CelestialObjects
                 state.Coordinates.CartesianCoordinates = new CartesianCoordinates
                 {
                     Origin = Body.Sun,
+                    Position = Vector<double>.Build.Random(3),
                 };
                 //FIXME Implement logic using coordinate frame from input
-            }
-            else
-            {
-                throw new InvalidOperationException("Earth.GetHelioCentricState() -> Not supported CoordinateType: "+coordinateType.ToString());
             }
         }
 
         internal static void GetBodyCentricState(Body body, State state)
         {
             BodyCentricCoordinates bodyCentricCoordinates = state.Coordinates.BodyCentricCoordinates;
-            if (body.)
         }
     }
 }

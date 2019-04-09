@@ -1,13 +1,16 @@
 ﻿<Properties StartupConfiguration="{AAF9137D-85C0-412F-BBD5-D6E6DBABED53}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument=".gitignore">
+  <MonoDevelop.Ide.Workbench ActiveDocument="CelestialObjects/Helper.cs">
     <Files>
-      <File FileName="Program.cs" Line="15" Column="17" />
+      <File FileName="Program.cs" Line="35" Column="74" />
       <File FileName="Settings.cs" Line="1" Column="1" />
       <File FileName="CelestialObjects/CelestialBodies.cs" Line="1" Column="1" />
-      <File FileName="CelestialObjects/Earth.cs" Line="1" Column="1" />
-      <File FileName="CelestialObjects/Helper.cs" Line="1" Column="15" />
+      <File FileName="CelestialObjects/Earth.cs" Line="1" Column="7" />
+      <File FileName="CelestialObjects/Helper.cs" Line="94" Column="22" />
       <File FileName="Astronomy/Settings.cs" Line="1" Column="1" />
       <File FileName=".gitignore" Line="18" Column="6" />
+      <File FileName="Generic/State.cs" Line="25" Column="1" />
+      <File FileName="Astronomy/RiseSet/RiseSet.Main.cs" Line="47" Column="19" />
+      <File FileName="Generic/Coordinates.cs" Line="234" Column="75" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
@@ -17,9 +20,13 @@
               <Node name="Dependencies" expanded="True">
                 <Node name="PackageDependencies" expanded="True" />
               </Node>
-              <Node name="Astronomy" expanded="True" />
-              <Node name="CelestialObjects" expanded="True" />
-              <Node name=".gitignore" selected="True" />
+              <Node name="Astronomy" expanded="True">
+                <Node name="RiseSet" expanded="True" />
+              </Node>
+              <Node name="CelestialObjects" expanded="True">
+                <Node name="Helper.cs" selected="True" />
+              </Node>
+              <Node name="Generic" expanded="True" />
             </Node>
           </Node>
         </State>
@@ -30,7 +37,11 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.ItemProperties.Sunrise PreferredExecutionTarget="MonoDevelop.Default" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
+    <BreakpointStore>
+      <Breakpoint file="/Users/Vishnu/Documents/GitHub/Sunrise/Astronomy/RiseSet/RiseSet.Main.cs" relfile="Astronomy/RiseSet/RiseSet.Main.cs" line="30" column="1" />
+      <Breakpoint file="/Users/Vishnu/Documents/GitHub/Sunrise/Astronomy/RiseSet/RiseSet.Main.cs" relfile="Astronomy/RiseSet/RiseSet.Main.cs" line="49" column="17" />
+      <Breakpoint file="/Users/Vishnu/Documents/GitHub/Sunrise/CelestialObjects/Helper.cs" relfile="CelestialObjects/Helper.cs" line="37" column="1" />
+    </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MultiItemStartupConfigurations />
 </Properties>

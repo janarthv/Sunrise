@@ -229,13 +229,9 @@ namespace Sunrise.Generic
 
     public class Coordinates
     {
-        public bool IsKeplerianCoordinatesNeeded { get; set; }
         public KeplerianCoordinates KeplerianCoordinates { get; set; }
-        public bool IsCartesianCoordinatesNeeded { get; set; }
         public CartesianCoordinates CartesianCoordinates { get; set; }
-        public bool IsBodyCentricCoordinatesNeeded { get; set; }
         public BodyCentricCoordinates BodyCentricCoordinates { get; set; }
-        public bool IsTopoCentricCoordinatesNeeded { get; set; }
         public TopoCentricCoordinates TopoCentricCoordinates { get; set; }
 
         //public Coordinates Convert(CoordinateType to)

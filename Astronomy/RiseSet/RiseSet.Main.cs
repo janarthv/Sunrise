@@ -18,31 +18,47 @@ namespace Sunrise.Astronomy.RiseSet
     public class RiseSet
     {
         public Observer Observer { get; set; }
-        public CelestialBody Observee { get; set; }
+        public Body Observee { get; set; }
         public DateTime TimeFrom { get; set; }
         public DateTime TimeTo { get; set; }
 
         public void Show()
         {
             Astronomy.Settings.SetEarthBased();
-            Console.WriteLine(Observer.Name + ": Rise and set times for celestial body "+ Observee.Name + "\n");
+            Console.WriteLine(Observer.Name + ": Rise and set times for celestial body "+ Observee.ToString() + "\n");
             DateTime date = TimeFrom;
             while (date <= TimeTo)
             {
-                //Get az, el of body w.r.t observer
-                State bodyState = new State
+                State state = new State
                 {
                     Epoch = date,
-                    Coordinates = new Coordinates()
+                    Coordinates = new Coordinates
                     {
-                        //Type = Generic.CoordinateType.TopoCentric,
-                        TopoCentricCoordinates = new TopoCentricCoordinates
+                        CartesianCoordinates = new CartesianCoordinates
                         {
-                            Location = Observer.GeocentricCoordinates,
-                            LocalFrame = Frame.ENU,
-                        },
-                    }
+                            Origin = Body.Earth,
+                            CoordinateFrame = Frame.EME2000,
+                        }
+                    },
                 };
+                GenericStateRetriever = new StateRetriever
+                {
+
+                };
+                GetState(Body.Sun, state, Depth.Position);
+                //State bodyState = new State
+                //{
+                //    Epoch = date,
+                //    Coordinates = new Coordinates()
+                //    {
+                //        //Type = Generic.CoordinateType.TopoCentric,
+                //        TopoCentricCoordinates = new TopoCentricCoordinates
+                //        {
+                //            Location = Observer.GeocentricCoordinates,
+                //            LocalFrame = Frame.ENU,
+                //        },
+                //    }
+                //};
                 //Observee.GetState(bodyState);
             }
         }

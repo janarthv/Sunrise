@@ -9,7 +9,7 @@ namespace Sunrise.Generic
     {
         public DateTime Epoch { get; set; }
         public Coordinates Coordinates { get; set; }
-        public void CheckCoordinatesValidity()
+        public void CheckValidity()
         {
             string errorMessage = "State.CheckValidity():";
             if (Epoch == null)
@@ -21,15 +21,6 @@ namespace Sunrise.Generic
             {
                 errorMessage += "State coordinates";
                 throw new ArgumentNullException("State coordinates");
-            }
-            try
-            {
-                Coordinates.CheckValidity();
-            }
-            catch 
-            {
-                errorMessage += "Invalid state coordinates";
-                throw new ArgumentException(errorMessage);
             }
         }
     }

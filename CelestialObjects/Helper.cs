@@ -11,19 +11,28 @@ namespace Sunrise.CelestialObjects
         Acceleration,
     }
 
-    public static class Helper
+    public class CoordinatesNeeded
     {
-        public static void GetState(Body body, State state, Depth depth)
+        public bool Keplerian { get; set; }
+        public bool Cartesian { get; set; }
+        public bool BodyCentric { get; set; }
+        public bool TopoCentric { get; set; }
+    }
+
+    public class StateRetriever
+    {
+        public CoordinatesNeeded CoordinatesNeeded { get; set; }
+        public void GetState(Body body, State state, Depth depth)
         {
-            state.CheckCoordinatesValidity();
+            state.CheckValidity();
             Coordinates stateCoordinates = state.Coordinates;
             if (body == Body.Sun)
             {
-                if (stateCoordinates.IsKeplerianCoordinatesNeeded)
+                if (CoordinatesNeeded.Keplerian)
                 {
                     throw new NotImplementedException();
                 }
-                if (stateCoordinates.IsCartesianCoordinatesNeeded)
+                if (CoordinatesNeeded.Cartesian)
                 {
                     CartesianCoordinates cartesianCoordinates = stateCoordinates.CartesianCoordinates;
                     if (cartesianCoordinates == null || cartesianCoordinates.Origin == null || cartesianCoordinates.CoordinateFrame == null)
@@ -38,14 +47,20 @@ namespace Sunrise.CelestialObjects
                             Epoch = state.Epoch,
                             Coordinates = new Coordinates
                             {
-                                IsCartesianCoordinatesNeeded = true,
                                 CartesianCoordinates = new CartesianCoordinates
                                 {
                                     CoordinateFrame = cartesianCoordinates.CoordinateFrame,
                                 }
                             }
                         };
-                        GetHelioCentricState(origin, intState, depth);
+                        StateRetriever stateRetriever = new StateRetriever
+                        {
+                            CoordinatesNeeded = new CoordinatesNeeded
+                            {
+                                Cartesian = true,
+                            }
+                        };
+                        stateRetriever.GetHelioCentricState(origin, intState, depth);
                         intState.Coordinates.CartesianCoordinates.Negative(); //BETTERME
                         cartesianCoordinates.Position = intState.Coordinates.CartesianCoordinates.Position;
                         if (depth == Depth.Velocity)
@@ -70,7 +85,7 @@ namespace Sunrise.CelestialObjects
             }
         }
 
-        private static void GetHelioCentricState(Body body, State state, Depth depth)
+        public void GetHelioCentricState(Body body, State state, Depth depth)
         {
             if (body == Body.Sun)
             {
@@ -86,7 +101,7 @@ namespace Sunrise.CelestialObjects
             }
         }
 
-        private static void GetBodyCentricState(Body centreBody, Body body, State state)
+        public void GetBodyCentricState(Body centreBody, Body body, State state)
         {
             if (centreBody == Body.Earth)
             {
