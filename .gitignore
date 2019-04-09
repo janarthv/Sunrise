@@ -2,7 +2,8 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/Sunrise/.vs/Sunrise/v15/Server/sqlite3/db.lock
+/Sunrise/.vs/*
+.vs/*
 .DS_Store
 .DS_Store
 Sunrise/.vs/Sunrise/xs/sqlite3/storage.ide-shm
@@ -13,3 +14,5 @@ Sunrise/Sunrise/obj/Debug/netcoreapp2.1/Sunrise.csprojAssemblyReference.cache
 *.ide-wal
 .vs/Sunrise/xs/UserPrefs.xml
 *.ide-shm
+obj/*
+bin/*

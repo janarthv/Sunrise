@@ -1,6 +1,5 @@
 ﻿using System;
 using Sunrise.Generic;
-using Sunrise.Generic.Frames;
 
 namespace Sunrise.CelestialObjects
 {
