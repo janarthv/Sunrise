@@ -7,5 +7,9 @@ namespace Sunrise.Generic.Frames
     public enum Frame
     {
         EME2000,
+        // Earth specific rotating frames
+        ECEF,
+        // Topocentric frames,
+        ENU,
     }
 }
