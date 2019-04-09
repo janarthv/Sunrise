@@ -10,3 +10,4 @@ Sunrise/.vs/Sunrise/xs/sqlite3/storage.ide-wal
 Sunrise/Sunrise/obj/Debug/netcoreapp2.1/Sunrise.csprojAssemblyReference.cache
 .DS_Store
 *.ide-wal
+*.ide-wal
