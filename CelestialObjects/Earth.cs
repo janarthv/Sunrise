@@ -5,10 +5,36 @@ namespace Sunrise.CelestialObjects
 {
     public static class Earth
     {
-        public static void GetHelioCentricState(State state)
+        public static void GetHelioCentricState(State state,Depth depth)
         {
-            throw new NotImplementedException();
-        }                
+            Coordinates coordinates = state.Coordinates;
+            if (coordinates.IsKeplerianCoordinatesNeeded )
+            {
+                coordinates.KeplerianCoordinates = new KeplerianCoordinates
+                {
+                    Origin = Body.Sun,
+                };
+                //FIXME Implement logic using coordinate frame from input
+            }
+            if (state.Coordinates.IsCartesianCoordinatesNeeded)
+            {
+                state.Coordinates.CartesianCoordinates = new CartesianCoordinates
+                {
+                    Origin = Body.Sun,
+                };
+                //FIXME Implement logic using coordinate frame from input
+            }
+            else
+            {
+                throw new InvalidOperationException("Earth.GetHelioCentricState() -> Not supported CoordinateType: "+coordinateType.ToString());
+            }
+        }
+
+        internal static void GetBodyCentricState(Body body, State state)
+        {
+            BodyCentricCoordinates bodyCentricCoordinates = state.Coordinates.BodyCentricCoordinates;
+            if (body.)
+        }
     }
 }
 

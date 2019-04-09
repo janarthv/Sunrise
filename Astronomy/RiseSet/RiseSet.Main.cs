@@ -35,7 +35,7 @@ namespace Sunrise.Astronomy.RiseSet
                     Epoch = date,
                     Coordinates = new Coordinates()
                     {
-                        Type = Generic.CoordinateType.TopoCentric,
+                        //Type = Generic.CoordinateType.TopoCentric,
                         TopoCentricCoordinates = new TopoCentricCoordinates
                         {
                             Location = Observer.GeocentricCoordinates,
@@ -43,7 +43,7 @@ namespace Sunrise.Astronomy.RiseSet
                         },
                     }
                 };
-                Observee.GetState(bodyState);
+                //Observee.GetState(bodyState);
             }
         }
     }

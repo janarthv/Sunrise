@@ -9,7 +9,7 @@ namespace Sunrise.Generic
     {
         public DateTime Epoch { get; set; }
         public Coordinates Coordinates { get; set; }
-        public void CheckValidity()
+        public void CheckCoordinatesValidity()
         {
             string errorMessage = "State.CheckValidity():";
             if (Epoch == null)

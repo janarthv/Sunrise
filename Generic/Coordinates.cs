@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 
+using MathNet.Numerics;
+
 using Sunrise.Generic.Frames;
 using Sunrise.CelestialObjects;
 using System.Linq;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace Sunrise.Generic
 {
@@ -16,10 +19,15 @@ namespace Sunrise.Generic
         TopoCentric,
     }
 
-    public abstract class BasicCoordinates
+    public abstract class GenericProperty
     {
-        public Frame Frame { get; set; }
-        public Body Origin { get; set; }
+        public bool IsValid { get; set; }
+    }
+
+    public abstract class BasicCoordinates : GenericProperty
+    {
+        public Frame? CoordinateFrame { get; set; }
+        public Body? Origin { get; set; }
     }
 
     public class KeplerianCoordinates : BasicCoordinates
@@ -33,7 +41,8 @@ namespace Sunrise.Generic
 
         public KeplerianCoordinates()
         {
-            Frame = Frame.EME2000;
+            IsValid = true;
+            CoordinateFrame = Frame.EME2000;
             Origin = Body.Sun;
             SMA = 0D;
             Ecc = 0D;
@@ -51,7 +60,7 @@ namespace Sunrise.Generic
             RAAN = raan;
             ArgPer = argPer;
             TA = ta;
-            Frame = frame;
+            CoordinateFrame = frame;
             Origin = origin;
         }
 
@@ -61,63 +70,58 @@ namespace Sunrise.Generic
         }
     }
 
-    public class Position
-    {
-        double X { get; set; }
-        double Y { get; set; }
-        double Z { get; set; }
-
-        public Position()
-        {
-            X = 0D;
-            Y = 0D;
-            Z = 0D;
-        }
-
-        public Position(double x, double y, double z)
-        {
-            X = x;
-            Y = y;
-            Z = z;
-        }
-    }
-
-    public class Velocity
-    {
-        double X { get; set; }
-        double Y { get; set; }
-        double Z { get; set; }
-
-        public Velocity()
-        {
-            X = 0D;
-            Y = 0D;
-            Z = 0D;
-        }
-
-        public Velocity(double x, double y, double z)
-        {
-            X = x;
-            Y = y;
-            Z = z;
-        }
-    }
-
     public class CartesianCoordinates : BasicCoordinates
     {
-        public Position Position { get; set; }
-        public Velocity Velocity { get; set; }
+        private Vector<double> _pos;
+        public Vector<double> Position
+        {
+            get
+            {
+                return _pos;
+            }
+            set
+            {
+                if (value.Count() != 3)
+                {
+                    throw new ArgumentException("Position vector should a vector double of length 3");
+                }
+                else
+                {
+                    _pos = value;
+                }
+            }
+        }
+        private Vector<double> _vel;
+        public Vector<double> Velocity
+        {
+            get
+            {
+                return _vel;
+            }
+            set
+            {
+                if (value.Count() != 3)
+                {
+                    throw new ArgumentException("Position vector should a vector double of length 3");
+                }
+                else
+                {
+                    _vel = value;
+                }
+            }
+        }
         public CartesianCoordinates()
         {
-            Frame = Frame.EME2000;
+            IsValid = true;
+            CoordinateFrame = Frame.EME2000;
             Origin = Body.Sun;
-            Position = new Position();
-            Velocity = new Velocity();
+            Position = Vector<double>.Build.Dense(3);
+            Velocity = Vector<double>.Build.Dense(3);
         }
 
-        public CartesianCoordinates(Position position, Velocity velocity, Frame frame, Body origin)
+        public CartesianCoordinates(Vector<double> position, Vector<double> velocity, Frame frame, Body origin)
         {
-            Frame = frame;
+            CoordinateFrame = frame;
             Origin = origin;
             Position = position;
             Velocity = velocity;
@@ -126,6 +130,12 @@ namespace Sunrise.Generic
         internal void CheckValidity()
         {
             throw new NotImplementedException();
+        }
+
+        public void Negative()
+        {
+            _pos = -_pos;
+            _vel = -_vel;
         }
     }
 
@@ -147,10 +157,10 @@ namespace Sunrise.Generic
         }
     }
 
-    public abstract class BodyCoordinates
+    public abstract class BodyCoordinates : GenericProperty
     {
-        public CelestialBody Body { get; set; }
-        public Frame BodyFrame { get; set; }
+        public Body? CentreBody { get; set; }
+        public Frame? BodyFrame { get; set; }
     }
 
     public class BodyCentricCoordinates : BodyCoordinates
@@ -159,15 +169,16 @@ namespace Sunrise.Generic
         public double Altitude { get; set; }
         public BodyCentricCoordinates()
         {
+            IsValid = true;
             LatLon = new LatLon();
             Altitude = 0D;
-            Body = CelestialBodies.Earth;
+            CentreBody = Body.Earth;
             BodyFrame = CelestialBodies.Earth.Frames.First();
         }
 
-        public BodyCentricCoordinates(LatLon latLon, double altitude, CelestialBody body, Frame bodyFrame)
+        public BodyCentricCoordinates(LatLon latLon, double altitude, Body body, Frame bodyFrame)
         {
-            Body = body;
+            CentreBody = body;
             BodyFrame = bodyFrame;
             LatLon = latLon;
             Altitude = altitude;
@@ -179,9 +190,9 @@ namespace Sunrise.Generic
         }
     }
 
-    public abstract class LocalCoordinates
+    public abstract class LocalCoordinates : GenericProperty
     {
-        public Frame LocalFrame { get; set; }
+        public Frame? LocalFrame { get; set; }
     }
 
     public class TopoCentricCoordinates : LocalCoordinates
@@ -193,6 +204,7 @@ namespace Sunrise.Generic
 
         public TopoCentricCoordinates()
         {
+            IsValid = true;
             LocalFrame = Frame.ENU;
             Location = new BodyCentricCoordinates();
             Azimuth = 0D;
@@ -217,103 +229,99 @@ namespace Sunrise.Generic
 
     public class Coordinates
     {
-        public CoordinateType? Type { get; set; }
+        public bool IsKeplerianCoordinatesNeeded { get; set; }
         public KeplerianCoordinates KeplerianCoordinates { get; set; }
+        public bool IsCartesianCoordinatesNeeded { get; set; }
         public CartesianCoordinates CartesianCoordinates { get; set; }
+        public bool IsBodyCentricCoordinatesNeeded { get; set; }
         public BodyCentricCoordinates BodyCentricCoordinates { get; set; }
+        public bool IsTopoCentricCoordinatesNeeded { get; set; }
         public TopoCentricCoordinates TopoCentricCoordinates { get; set; }
 
-        public Coordinates()
-        {
-            Type = CoordinateType.Cartesian;
-            CartesianCoordinates = new CartesianCoordinates();
-        }
+        //public Coordinates Convert(CoordinateType to)
+        //{
+        //    if (to == CoordinateType.Cartesian && CartesianCoordinates != null)
+        //    {
+        //        KeplerianToCartesian(this);
+        //    }
+        //    else if(to == CoordinateType.Keplerian && KeplerianCoordinates != null)
+        //    {
+        //        CartesianToKeplerian(this);
+        //    }
+        //    return this;
+        //}
 
-        public Coordinates Convert(CoordinateType to)
-        {
-            if (to == CoordinateType.Cartesian && CartesianCoordinates != null)
-            {
-                KeplerianToCartesian(this);
-            }
-            else if(to == CoordinateType.Keplerian && KeplerianCoordinates != null)
-            {
-                CartesianToKeplerian(this);
-            }
-            return this;
-        }
+        //private void GeocentricToCartesian(Coordinates coordinates)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        private void GeocentricToCartesian(Coordinates coordinates)
-        {
-            throw new NotImplementedException();
-        }
+        //private void CartesianToGeocentric(Coordinates coordinates)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        private void CartesianToGeocentric(Coordinates coordinates)
-        {
-            throw new NotImplementedException();
-        }
+        //private void CartesianToKeplerian(Coordinates coordinates)
+        //{
+        //    coordinates.KeplerianCoordinates = new KeplerianCoordinates();
+        //}
 
-        private void CartesianToKeplerian(Coordinates coordinates)
-        {
-            coordinates.KeplerianCoordinates = new KeplerianCoordinates();
-        }
+        //private void KeplerianToCartesian(Coordinates coordinates)
+        //{
+        //    coordinates.CartesianCoordinates = new CartesianCoordinates();
+        //}
 
-        private void KeplerianToCartesian(Coordinates coordinates)
-        {
-            coordinates.CartesianCoordinates = new CartesianCoordinates();
-        }
-
-        public void CheckValidity()
-        {
-            string errorMessage = "Coordinates.CheckValidity():";
-            if (Type == CoordinateType.Keplerian)
-            {
-                try
-                {
-                    KeplerianCoordinates.CheckValidity();
-                }
-                catch
-                {
-                    errorMessage += "Invalid Keplerian coordinates";
-                    throw new ArgumentException(errorMessage);
-                }
-            }
-            else if (Type == CoordinateType.Cartesian)
-            {
-                try
-                {
-                    CartesianCoordinates.CheckValidity();
-                }
-                catch
-                {
-                    errorMessage += "Invalid Cartesian coordinates";
-                    throw new ArgumentException(errorMessage);
-                }
-            }
-            else if (Type == CoordinateType.BodyCentric)
-            {
-                try
-                {
-                    BodyCentricCoordinates.CheckValidity();
-                }
-                catch
-                {
-                    errorMessage += "Invalid BodyCentric coordinates";
-                    throw new ArgumentException(errorMessage);
-                }
-            }
-            else if (Type == CoordinateType.TopoCentric)
-            {
-                try
-                {
-                    TopoCentricCoordinates.CheckValidity();
-                }
-                catch
-                {
-                    errorMessage += "Invalid TopoCentric coordinates";
-                    throw new ArgumentException(errorMessage);
-                }
-            }
-        }
+        //public void CheckValidity()
+        //{
+        //    string errorMessage = "Coordinates.CheckValidity():";
+        //    if (Type == CoordinateType.Keplerian)
+        //    {
+        //        try
+        //        {
+        //            KeplerianCoordinates.CheckValidity();
+        //        }
+        //        catch
+        //        {
+        //            errorMessage += "Invalid Keplerian coordinates";
+        //            throw new ArgumentException(errorMessage);
+        //        }
+        //    }
+        //    else if (Type == CoordinateType.Cartesian)
+        //    {
+        //        try
+        //        {
+        //            CartesianCoordinates.CheckValidity();
+        //        }
+        //        catch
+        //        {
+        //            errorMessage += "Invalid Cartesian coordinates";
+        //            throw new ArgumentException(errorMessage);
+        //        }
+        //    }
+        //    else if (Type == CoordinateType.BodyCentric)
+        //    {
+        //        try
+        //        {
+        //            BodyCentricCoordinates.CheckValidity();
+        //        }
+        //        catch
+        //        {
+        //            errorMessage += "Invalid BodyCentric coordinates";
+        //            throw new ArgumentException(errorMessage);
+        //        }
+        //    }
+        //    else if (Type == CoordinateType.TopoCentric)
+        //    {
+        //        try
+        //        {
+        //            TopoCentricCoordinates.CheckValidity();
+        //        }
+        //        catch
+        //        {
+        //            errorMessage += "Invalid TopoCentric coordinates";
+        //            throw new ArgumentException(errorMessage);
+        //        }
+        //    }
+        //}
     }
-
 }

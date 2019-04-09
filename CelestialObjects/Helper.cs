@@ -1,52 +1,84 @@
-﻿using System; 
+﻿using System;
+using MathNet.Numerics.LinearAlgebra;
 using Sunrise.Generic;
 
 namespace Sunrise.CelestialObjects
 {
+    public enum Depth
+    {
+        Position,
+        Velocity,
+        Acceleration,
+    }
+
     public static class Helper
     {
-        public static void GetState(Body body, State state)
+        public static void GetState(Body body, State state, Depth depth)
         {
-            state.CheckValidity();
+            state.CheckCoordinatesValidity();
+            Coordinates stateCoordinates = state.Coordinates;
             if (body == Body.Sun)
             {
-                if (state.Coordinates.Type == CoordinateType.Cartesian)
+                if (stateCoordinates.IsKeplerianCoordinatesNeeded)
                 {
-                    Body origin = state.Coordinates.CartesianCoordinates.Origin;
-                    if (origin == Body.Sun)
+                    throw new NotImplementedException();
+                }
+                if (stateCoordinates.IsCartesianCoordinatesNeeded)
+                {
+                    CartesianCoordinates cartesianCoordinates = stateCoordinates.CartesianCoordinates;
+                    if (cartesianCoordinates == null || cartesianCoordinates.Origin == null || cartesianCoordinates.CoordinateFrame == null)
                     {
-                        state.Coordinates.CartesianCoordinates = new CartesianCoordinates
-                        {
-                            Position = new Position(),
-                            Velocity = new Velocity(),
-                        };
+                        throw new ArgumentNullException();
                     }
-                    else
+                    Body origin = cartesianCoordinates.Origin.Value;
+                    if (origin != Body.Sun)
                     {
-                        //FIXME 
-                        state = new State
+                        State intState = new State
                         {
                             Epoch = state.Epoch,
                             Coordinates = new Coordinates
                             {
-                                Type = CoordinateType.Cartesian,
+                                IsCartesianCoordinatesNeeded = true,
                                 CartesianCoordinates = new CartesianCoordinates
                                 {
-                                    Frame = state.Coordinates.CartesianCoordinates.Frame,
-                                },
-                            },
+                                    CoordinateFrame = cartesianCoordinates.CoordinateFrame,
+                                }
+                            }
                         };
-                        GetHelioCentricState(origin,state);
+                        GetHelioCentricState(origin, intState, depth);
+                        intState.Coordinates.CartesianCoordinates.Negative(); //BETTERME
+                        cartesianCoordinates.Position = intState.Coordinates.CartesianCoordinates.Position;
+                        if (depth == Depth.Velocity)
+                        {
+                            cartesianCoordinates.Velocity = intState.Coordinates.CartesianCoordinates.Velocity;
+                        }
+                    }
+                }
+                if (stateCoordinates.IsBodyCentricCoordinatesNeeded)
+                {
+                    BodyCentricCoordinates bodyCentricCoordinates = stateCoordinates.BodyCentricCoordinates;
+                    if (bodyCentricCoordinates == null || bodyCentricCoordinates.CentreBody == null || bodyCentricCoordinates.BodyFrame == null)
+                    {
+                        throw new ArgumentNullException();
+                    }
+                    Body centreBody = bodyCentricCoordinates.CentreBody.Value;
+                    if (centreBody != Body.Sun)
+                    {
+                        GetBodyCentricState(centreBody, body, state);
                     }
                 }
             }
         }
 
-        private static void GetHelioCentricState(Body body, State state)
+        private static void GetHelioCentricState(Body body, State state, Depth depth)
         {
-            if (body == Body.Earth)
+            if (body == Body.Sun)
             {
-                Earth.GetHelioCentricState(state);
+                throw new InvalidOperationException();
+            }
+            else if (body == Body.Earth)
+            {
+                Earth.GetHelioCentricState(state, depth);
             }
             else
             {
@@ -54,5 +86,16 @@ namespace Sunrise.CelestialObjects
             }
         }
 
+        private static void GetBodyCentricState(Body centreBody, Body body, State state)
+        {
+            if (centreBody == Body.Earth)
+            {
+                Earth.GetBodyCentricState(body, state);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 }
