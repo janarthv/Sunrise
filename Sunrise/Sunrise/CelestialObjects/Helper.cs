@@ -23,6 +23,7 @@ namespace Sunrise.CelestialObjects
                     }
                     else
                     {
+                        //FIXME
                         state = new State
                         {
                             Epoch = state.Epoch,
