@@ -12,14 +12,15 @@ namespace Sunrise.CelestialObjects
         public static void GetHelioCentricKeplerianElements(State state)
         {
             state.CheckValidity();
-            KeplerianCoordinates keplerianCoordinates = state.Coordinates.KeplerianCoordinates;
+            Coordinates coordinates = state.CoordinatesSet[Body.Sun];
+            KeplerianCoordinates keplerianCoordinates = coordinates.KeplerianCoordinates;
             if (keplerianCoordinates == null || keplerianCoordinates.CoordinateFrame == null)
             {
                 throw new ArgumentNullException();
             }
             if (keplerianCoordinates.CoordinateFrame == Frame.EME2000)
             {
-                state.Coordinates.KeplerianCoordinates = new KeplerianCoordinates
+                coordinates.KeplerianCoordinates = new KeplerianCoordinates
                 {
                     SMA = 1.00000011 * Constants.AU,
                     Ecc = 0.01671022,

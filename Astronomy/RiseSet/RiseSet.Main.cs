@@ -35,22 +35,35 @@ namespace Sunrise.Astronomy.RiseSet
                 Body = Body.Sun,
                 CoordinatesNeeded = new CoordinatesNeeded
                 {
-                    Keplerian = true,
+                    Keplerian = false,
                     Cartesian = true,
                 },
                 State = new State
                 {
                     Epoch = date,
-                    Coordinates = new Coordinates
+                    CoordinatesSet = new Dictionary<Body, Coordinates>
                     {
-                        CartesianCoordinates = new CartesianCoordinates
                         {
-                            //Origin = Body.Sun,
-                            CoordinateFrame = Frame.EME2000,
-                        },
-                        KeplerianCoordinates = new KeplerianCoordinates
-                        {
-                            CoordinateFrame = Frame.EME2000,
+                            Body.Sun,
+                            new Coordinates
+                            {
+                                Body = Body.Earth,
+                                KeplerianCoordinates = new KeplerianCoordinates
+                                {
+                                    CoordinateFrame = Frame.EME2000,
+                                },
+                                CartesianCoordinates = new List<CartesianCoordinates>
+                                {
+                                    new CartesianCoordinates
+                                    {
+                                        CoordinateFrame = Frame.EME2000,
+                                    },
+                                    new CartesianCoordinates
+                                    {
+                                        CoordinateFrame = Frame.ECEF,
+                                    },
+                                },
+                            }
                         },
                     },
                 },

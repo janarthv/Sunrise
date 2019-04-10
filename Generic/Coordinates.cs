@@ -212,10 +212,11 @@ namespace Sunrise.Generic
 
     public class Coordinates
     {
+        public Body? Body { get; set; }
         public KeplerianCoordinates KeplerianCoordinates { get; set; }
-        public CartesianCoordinates CartesianCoordinates { get; set; }
+        public IEnumerable<CartesianCoordinates> CartesianCoordinates { get; set; }
         public BodyCentricCoordinates BodyCentricCoordinates { get; set; }
-        public TopoCentricCoordinates TopoCentricCoordinates { get; set; }
+        public IEnumerable<TopoCentricCoordinates> TopoCentricCoordinates { get; set; }
 
         internal void ConvertKeplerianToCartesian()
         {
