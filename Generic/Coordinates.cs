@@ -41,15 +41,6 @@ namespace Sunrise.Generic
 
         public KeplerianCoordinates()
         {
-            IsValid = true;
-            CoordinateFrame = Frame.EME2000;
-            Origin = Body.Sun;
-            SMA = 0D;
-            Ecc = 0D;
-            Inc = 0D;
-            RAAN = 0D;
-            ArgPer = 0D;
-            TA = 0D;
         }
 
         public KeplerianCoordinates(double sma, double ecc, double inc, double raan, double argPer, double ta, Frame frame, Body origin)
@@ -110,13 +101,10 @@ namespace Sunrise.Generic
                 }
             }
         }
+
         public CartesianCoordinates()
         {
-            IsValid = true;
-            CoordinateFrame = Frame.EME2000;
-            Origin = Body.Sun;
-            //Position = Vector<double>.Build.Dense(3);
-            //Velocity = Vector<double>.Build.Dense(3);
+
         }
 
         public CartesianCoordinates(Vector<double> position, Vector<double> velocity, Frame frame, Body origin)
@@ -175,11 +163,6 @@ namespace Sunrise.Generic
         public double Altitude { get; set; }
         public BodyCentricCoordinates()
         {
-            IsValid = true;
-            LatLon = new LatLon();
-            Altitude = 0D;
-            CentreBody = Body.Earth;
-            BodyFrame = CelestialBodies.Earth.Frames.First();
         }
 
         public BodyCentricCoordinates(LatLon latLon, double altitude, Body body, Frame bodyFrame)
@@ -210,12 +193,6 @@ namespace Sunrise.Generic
 
         public TopoCentricCoordinates()
         {
-            IsValid = true;
-            LocalFrame = Frame.ENU;
-            Location = new BodyCentricCoordinates();
-            Azimuth = 0D;
-            Elevation = 0D;
-            Range = 0D;
         }
 
         public TopoCentricCoordinates(BodyCentricCoordinates location, double azimuth, double elevation, double range, Frame localFrame)

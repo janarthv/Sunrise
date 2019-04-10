@@ -27,29 +27,32 @@ namespace Sunrise.Astronomy.RiseSet
             Astronomy.Settings.SetEarthBased();
             Console.WriteLine(Observer.Name + ": Rise and set times for celestial body "+ Observee.ToString() + "\n");
             DateTime date = TimeFrom;
-            while (date <= TimeTo)
+            //while (date <= TimeTo)
+            //{
+            State state = new State
             {
-                State state = new State
+                Epoch = date,
+                Coordinates = new Coordinates
                 {
-                    Epoch = date,
-                    Coordinates = new Coordinates
+                    CartesianCoordinates = new CartesianCoordinates
                     {
-                        CartesianCoordinates = new CartesianCoordinates
-                        {
-                            Origin = Body.Earth,
-                            CoordinateFrame = Frame.EME2000,
-                        },
+                        Origin = Body.Earth,
+                        CoordinateFrame = Frame.EME2000,
+                    },
+                    KeplerianCoordinates = new KeplerianCoordinates(),
                     },
                 };
                 StateRetriever stateRetriever = new StateRetriever
                 {
+                    State = state,
                     CoordinatesNeeded = new CoordinatesNeeded
                     {
+                        Keplerian = true,
                         Cartesian = true,
                     },
                 };
-                stateRetriever.GetState(Body.Sun, state, Depth.Position);
-                //stateRetriever.GetHelioCentricState(Body.Earth, state, Depth.Position);
+                //stateRetriever.GetState(Body.Sun, Depth.Position);
+                stateRetriever.GetHelioCentricState(Body.Earth, Depth.Position);
                 //State bodyState = new State
                 //{
                 //    Epoch = date,
@@ -64,7 +67,7 @@ namespace Sunrise.Astronomy.RiseSet
                 //    }
                 //};
                 //Observee.GetState(bodyState);
-            }
+            //}
         }
     }
 }
