@@ -2,61 +2,39 @@
 using MathNet.Numerics.LinearAlgebra;
 using Sunrise.Generic;
 using Sunrise.Generic.Frames;
+using Sunrise.Generic.States;
 using Sunrise.Math;
 
 namespace Sunrise.CelestialObjects
 {
-    public class Earth
+    public static class Earth
     {
-        public CoordinatesNeeded CoordinatesNeeded { get; set; }
-        public void GetHelioCentricState(State state,Depth depth)
+        public static void GetHelioCentricKeplerianElements(State state)
         {
-            Coordinates coordinates = state.Coordinates;
-            if (CoordinatesNeeded.Keplerian)
+            state.CheckValidity();
+            KeplerianCoordinates keplerianCoordinates = state.Coordinates.KeplerianCoordinates;
+            if (keplerianCoordinates == null || keplerianCoordinates.CoordinateFrame == null)
             {
-                coordinates.KeplerianCoordinates = new KeplerianCoordinates
-                {
-                    Origin = Body.Sun,
-                };
-                //FIXME Implement logic using coordinate frame from input
+                throw new ArgumentNullException();
             }
-            if (CoordinatesNeeded.Cartesian)
+            if (keplerianCoordinates.CoordinateFrame == Frame.EME2000)
             {
-                state.Coordinates.CartesianCoordinates = new CartesianCoordinates
+                state.Coordinates.KeplerianCoordinates = new KeplerianCoordinates
                 {
+                    SMA = 1.00000011 * Constants.AU,
+                    Ecc = 0.01671022,
+                    Inc = BasicMath.DegreeToRadian(0.00005),
+                    RAAN = BasicMath.DegreeToRadian(-11.26064),
+                    ArgPer = BasicMath.DegreeToRadian(102.94719),
+                    TA = BasicMath.DegreeToRadian(100.46435),
                     Origin = Body.Sun,
-                    Position = Vector<double>.Build.Random(3),
+                    CoordinateFrame = Frame.EME2000,
                 };
-                //FIXME Implement logic using coordinate frame from input
             }
-        }
-
-        public void GetBodyCentricState(Body body, State state)
-        {
-            BodyCentricCoordinates bodyCentricCoordinates = state.Coordinates.BodyCentricCoordinates;
-        }
-
-        private void GetHelioCentricKeplerianElements(DateTime epoch)
-        {
-            State state = new State
+            else
             {
-                Epoch = new DateTime(2000, 1, 1, 12, 0, 0, 0, DateTimeKind.Utc),
-                Coordinates = new Coordinates
-                {
-                    KeplerianCoordinates = new KeplerianCoordinates
-                    {
-                        SMA = 1.00000011 * Constants.AU,
-                        Ecc = 0.01671022,
-                        Inc = BasicMath.DegreeToRadian(0.00005),
-                        RAAN = BasicMath.DegreeToRadian(-11.26064),
-                        ArgPer = BasicMath.DegreeToRadian(102.94719),
-                        TA = BasicMath.DegreeToRadian(100.46435),
-                        CoordinateFrame = Frame.EME2000,
-                        Origin = Body.Sun,
-                    },
-                },
-            };
-            return state.Coordinates.KeplerianCoordinates;
+                throw new NotImplementedException();
+            }
         }
     }
 }

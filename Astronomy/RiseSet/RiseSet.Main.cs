@@ -6,6 +6,7 @@ using Sunrise;
 using Sunrise.Generic;
 using Sunrise.Generic.Frames;
 using Sunrise.CelestialObjects;
+using Sunrise.Generic.States;
 
 namespace Sunrise.Astronomy.RiseSet
 {
@@ -24,50 +25,55 @@ namespace Sunrise.Astronomy.RiseSet
 
         public void Show()
         {
-            Astronomy.Settings.SetEarthBased();
-            Console.WriteLine(Observer.Name + ": Rise and set times for celestial body "+ Observee.ToString() + "\n");
+            Settings.SetEarthBased();
+            Console.WriteLine(Observer.Name + ": Rise and set times for celestial body " + Observee.ToString() + "\n");
             DateTime date = TimeFrom;
             //while (date <= TimeTo)
             //{
-            State state = new State
+            StateRetriever stateRetriever = new StateRetriever
             {
-                Epoch = date,
-                Coordinates = new Coordinates
+                Body = Body.Sun,
+                CoordinatesNeeded = new CoordinatesNeeded
                 {
-                    CartesianCoordinates = new CartesianCoordinates
-                    {
-                        Origin = Body.Earth,
-                        CoordinateFrame = Frame.EME2000,
-                    },
-                    KeplerianCoordinates = new KeplerianCoordinates(),
-                    },
-                };
-                StateRetriever stateRetriever = new StateRetriever
+                    Keplerian = true,
+                    Cartesian = true,
+                },
+                State = new State
                 {
-                    State = state,
-                    CoordinatesNeeded = new CoordinatesNeeded
+                    Epoch = date,
+                    Coordinates = new Coordinates
                     {
-                        Keplerian = true,
-                        Cartesian = true,
+                        CartesianCoordinates = new CartesianCoordinates
+                        {
+                            //Origin = Body.Sun,
+                            CoordinateFrame = Frame.EME2000,
+                        },
+                        KeplerianCoordinates = new KeplerianCoordinates
+                        {
+                            CoordinateFrame = Frame.EME2000,
+                        },
                     },
-                };
-                //stateRetriever.GetState(Body.Sun, Depth.Position);
-                stateRetriever.GetHelioCentricState(Body.Earth, Depth.Position);
-                //State bodyState = new State
-                //{
-                //    Epoch = date,
-                //    Coordinates = new Coordinates()
-                //    {
-                //        //Type = Generic.CoordinateType.TopoCentric,
-                //        TopoCentricCoordinates = new TopoCentricCoordinates
-                //        {
-                //            Location = Observer.GeocentricCoordinates,
-                //            LocalFrame = Frame.ENU,
-                //        },
-                //    }
-                //};
-                //Observee.GetState(bodyState);
+                },
+            };
+            //stateRetriever.GetState(Depth.Position);
+            //stateRetriever.GetBodyCentricState();
+            //stateRetriever.GetHelioCentricState(Depth.Position);
+            //State bodyState = new State
+            //{
+            //    Epoch = date,
+            //    Coordinates = new Coordinates()
+            //    {
+            //        //Type = Generic.CoordinateType.TopoCentric,
+            //        TopoCentricCoordinates = new TopoCentricCoordinates
+            //        {
+            //            Location = Observer.GeocentricCoordinates,
+            //            LocalFrame = Frame.ENU,
+            //        },
+            //    }
+            //};
+            //Observee.GetState(bodyState);
             //}
         }
     }
 }
+

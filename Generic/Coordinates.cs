@@ -217,38 +217,47 @@ namespace Sunrise.Generic
         public BodyCentricCoordinates BodyCentricCoordinates { get; set; }
         public TopoCentricCoordinates TopoCentricCoordinates { get; set; }
 
-        //public Coordinates Convert(CoordinateType to)
-        //{
-        //    if (to == CoordinateType.Cartesian && CartesianCoordinates != null)
-        //    {
-        //        KeplerianToCartesian(this);
-        //    }
-        //    else if(to == CoordinateType.Keplerian && KeplerianCoordinates != null)
-        //    {
-        //        CartesianToKeplerian(this);
-        //    }
-        //    return this;
-        //}
+        internal void ConvertKeplerianToCartesian()
+        {
+            try
+            {
+                CheckKeplerianCoordinatesValidity();
+                CheckCartesianCoordinatesValidity();
+            }
+            catch
+            {
+                throw new InvalidOperationException();
+            }
+            if (KeplerianCoordinates.CoordinateFrame != CartesianCoordinates.CoordinateFrame || KeplerianCoordinates.Origin == null)
+            {
+                throw new InvalidOperationException();
+            }
 
-        //private void GeocentricToCartesian(Coordinates coordinates)
-        //{
-        //    throw new NotImplementedException();
-        //}
+            //FIXME
+            CartesianCoordinates = new CartesianCoordinates
+            {
+                Origin = KeplerianCoordinates.Origin,
+                CoordinateFrame = KeplerianCoordinates.CoordinateFrame,
+                Position = Vector<double>.Build.Random(3),
+                Velocity = Vector<double>.Build.Random(3),
+            };
+        }
 
-        //private void CartesianToGeocentric(Coordinates coordinates)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        private void CheckCartesianCoordinatesValidity()
+        {
+            if (CartesianCoordinates == null || CartesianCoordinates.CoordinateFrame == null)
+            {
+                throw new ArgumentNullException();
+            }
+        }
 
-        //private void CartesianToKeplerian(Coordinates coordinates)
-        //{
-        //    coordinates.KeplerianCoordinates = new KeplerianCoordinates();
-        //}
-
-        //private void KeplerianToCartesian(Coordinates coordinates)
-        //{
-        //    coordinates.CartesianCoordinates = new CartesianCoordinates();
-        //}
+        private void CheckKeplerianCoordinatesValidity()
+        {
+            if (KeplerianCoordinates == null || KeplerianCoordinates.CoordinateFrame == null)
+            {
+                throw new ArgumentNullException();
+            }
+        }
 
         //public void CheckValidity()
         //{

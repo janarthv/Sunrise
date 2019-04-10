@@ -17,7 +17,6 @@ namespace Sunrise.CelestialObjects
         public Body Name { get; set; }
         public double MU { get; set; }      // Units in km3/s2
         public IEnumerable<Frame> Frames { get; set; }
-
     }
 
     public static partial class CelestialBodies

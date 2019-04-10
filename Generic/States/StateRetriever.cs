@@ -1,8 +1,7 @@
 ﻿using System;
-using MathNet.Numerics.LinearAlgebra;
-using Sunrise.Generic;
+using Sunrise.CelestialObjects;
 
-namespace Sunrise.CelestialObjects
+namespace Sunrise.Generic.States
 {
     public enum Depth
     {
@@ -19,18 +18,21 @@ namespace Sunrise.CelestialObjects
         public bool TopoCentric { get; set; }
     }
 
-    public class StateRetriever
+    public partial class StateRetriever
     {
+        public Body? Body { get; set; }
+        public State State { get; set; }
         public CoordinatesNeeded CoordinatesNeeded { get; set; }
-        public void GetState(Body body, State state, Depth depth)
+
+        public void GetState(Depth depth)
         {
-            if (CoordinatesNeeded == null)
+            if (Body == null || CoordinatesNeeded == null || State == null)
             {
                 throw new ArgumentNullException();
             }
-            state.CheckValidity();
-            Coordinates stateCoordinates = state.Coordinates;
-            if (body == Body.Sun)
+            State.CheckValidity();
+            Coordinates stateCoordinates = State.Coordinates;
+            if (Body == CelestialObjects.Body.Sun)
             {
                 if (CoordinatesNeeded.Keplerian)
                 {
@@ -44,11 +46,19 @@ namespace Sunrise.CelestialObjects
                         throw new ArgumentNullException();
                     }
                     Body origin = cartesianCoordinates.Origin.Value;
-                    if (origin != Body.Sun)
+                    if (origin != CelestialObjects.Body.Sun)
                     {
+                        StateRetriever stateRetriever = new StateRetriever
+                        {
+                            Body = origin,
+                            CoordinatesNeeded = new CoordinatesNeeded
+                            {
+                                Cartesian = true,
+                            },
+                        };
                         State intState = new State
                         {
-                            Epoch = state.Epoch,
+                            Epoch = State.Epoch,
                             Coordinates = new Coordinates
                             {
                                 CartesianCoordinates = new CartesianCoordinates
@@ -57,14 +67,8 @@ namespace Sunrise.CelestialObjects
                                 }
                             }
                         };
-                        StateRetriever stateRetriever = new StateRetriever
-                        {
-                            CoordinatesNeeded = new CoordinatesNeeded
-                            {
-                                Cartesian = true,
-                            }
-                        };
-                        stateRetriever.GetHelioCentricState(origin, intState, depth);
+                        stateRetriever.State = intState;
+                        stateRetriever.GetHelioCentricState(depth);
                         intState.Coordinates.CartesianCoordinates.Negative(); //BETTERME
                         cartesianCoordinates.Position = intState.Coordinates.CartesianCoordinates.Position;
                         if (depth == Depth.Velocity)
@@ -81,47 +85,11 @@ namespace Sunrise.CelestialObjects
                         throw new ArgumentNullException();
                     }
                     Body centreBody = bodyCentricCoordinates.CentreBody.Value;
-                    if (centreBody != Body.Sun)
+                    if (centreBody != CelestialObjects.Body.Sun)
                     {
-                        GetBodyCentricState(centreBody, body, state);
+                        //GetBodyCentricState(body);
                     }
                 }
-            }
-        }
-
-        public void GetHelioCentricState(Body body, State state, Depth depth)
-        {
-            if (body == Body.Sun)
-            {
-                throw new InvalidOperationException();
-            }
-            if (body == Body.Earth)
-            {
-                Earth earth = new Earth
-                {
-                    CoordinatesNeeded = CoordinatesNeeded,
-                };
-                earth.GetHelioCentricState(state, depth);
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public void GetBodyCentricState(Body centreBody, Body body, State state)
-        {
-            if (centreBody == Body.Earth)
-            {
-                Earth earth = new Earth
-                {
-                    CoordinatesNeeded = CoordinatesNeeded,
-                };
-                earth.GetBodyCentricState(body, state);
-            }
-            else
-            {
-                throw new NotImplementedException();
             }
         }
     }
