@@ -9,18 +9,15 @@ namespace Sunrise.CelestialObjects
 {
     public static class Earth
     {
-        public static void GetHelioCentricKeplerianElements(State state)
-        {
-            state.CheckValidity();
-            Coordinates coordinates = state.CoordinatesSet[Body.Sun];
-            KeplerianCoordinates keplerianCoordinates = coordinates.KeplerianCoordinates;
+        public static void GetHelioCentricKeplerianElements(DateTime epoch, ref KeplerianCoordinates keplerianCoordinates)
+        {            
             if (keplerianCoordinates == null || keplerianCoordinates.CoordinateFrame == null)
             {
                 throw new ArgumentNullException();
             }
             if (keplerianCoordinates.CoordinateFrame == Frame.EME2000)
             {
-                coordinates.KeplerianCoordinates = new KeplerianCoordinates
+                KeplerianCoordinates dummy = new KeplerianCoordinates
                 {
                     SMA = 1.00000011 * Constants.AU,
                     Ecc = 0.01671022,
@@ -31,6 +28,7 @@ namespace Sunrise.CelestialObjects
                     Origin = Body.Sun,
                     CoordinateFrame = Frame.EME2000,
                 };
+                keplerianCoordinates = dummy;
             }
             else
             {

@@ -8,6 +8,7 @@ namespace Sunrise.CelestialObjects
 {
     public enum Body
     {
+        Dummy,
         Sun,
         Earth,
     }

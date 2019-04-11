@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using MathNet.Numerics.LinearAlgebra;
 using Sunrise.CelestialObjects;
 
 namespace Sunrise.Generic.States
@@ -8,14 +11,6 @@ namespace Sunrise.Generic.States
         Position,
         Velocity,
         Acceleration,
-    }
-
-    public class CoordinatesNeeded
-    {
-        public bool Keplerian { get; set; }
-        public bool Cartesian { get; set; }
-        public bool BodyCentric { get; set; }
-        public bool TopoCentric { get; set; }
     }
 
     public partial class StateRetriever
@@ -31,7 +26,6 @@ namespace Sunrise.Generic.States
                 throw new ArgumentNullException();
             }
             State.CheckValidity();
-            Coordinates stateCoordinates = State.Coordinates;
             if (Body == CelestialObjects.Body.Sun)
             {
                 if (CoordinatesNeeded.Keplerian)
@@ -40,55 +34,56 @@ namespace Sunrise.Generic.States
                 }
                 if (CoordinatesNeeded.Cartesian)
                 {
-                    CartesianCoordinates cartesianCoordinates = stateCoordinates.CartesianCoordinates;
-                    if (cartesianCoordinates == null || cartesianCoordinates.Origin == null || cartesianCoordinates.CoordinateFrame == null)
+                    foreach (Coordinates stateCoordinates in State.CoordinatesSet)
                     {
-                        throw new ArgumentNullException();
-                    }
-                    Body origin = cartesianCoordinates.Origin.Value;
-                    if (origin != CelestialObjects.Body.Sun)
-                    {
-                        StateRetriever stateRetriever = new StateRetriever
+                        if (stateCoordinates.CoordinatesNeeded == null || stateCoordinates.CoordinatesNeeded.Cartesian)
                         {
-                            Body = origin,
-                            CoordinatesNeeded = new CoordinatesNeeded
+                            foreach (CartesianCoordinates cartesianCoordinates in stateCoordinates.CartesianCoordinates)
                             {
-                                Cartesian = true,
-                            },
-                        };
-                        State intState = new State
-                        {
-                            Epoch = State.Epoch,
-                            Coordinates = new Coordinates
-                            {
-                                CartesianCoordinates = new CartesianCoordinates
+                                if (cartesianCoordinates == null || cartesianCoordinates.Origin == null || cartesianCoordinates.CoordinateFrame == null)
                                 {
-                                    CoordinateFrame = cartesianCoordinates.CoordinateFrame,
+                                    throw new ArgumentNullException();
+                                }
+                                Body origin = cartesianCoordinates.Origin.Value;
+                                if (origin != CelestialObjects.Body.Sun)
+                                {
+                                    CartesianCoordinates dummyCartesianCoordinates = new CartesianCoordinates
+                                    {
+                                        Depth = cartesianCoordinates.Depth,
+                                        CoordinateFrame = cartesianCoordinates.CoordinateFrame,
+                                    };
+                                    Coordinates dummyCoordinates = new Coordinates
+                                    {
+                                        CoordinatesNeeded = new CoordinatesNeeded
+                                        {
+                                            Cartesian = true,                                            
+                                        },
+                                        KeplerianCoordinates = stateCoordinates.KeplerianCoordinates,
+                                        CartesianCoordinates = new List<CartesianCoordinates>
+                                        {
+                                            dummyCartesianCoordinates,
+                                        }
+                                    };
+                                    GetHelioCentricState(origin, State.Epoch, dummyCoordinates);
+                                    dummyCartesianCoordinates.Negative(); //BETTERME
+                                    cartesianCoordinates.Position = dummyCartesianCoordinates.Position;
+                                    cartesianCoordinates.Velocity = dummyCartesianCoordinates.Velocity;
+                                }
+                                else
+                                {
+                                    cartesianCoordinates.Position = Vector<double>.Build.Dense(3);
+                                    if (cartesianCoordinates.Depth == CartesianDepth.Velocity)
+                                    {
+                                        cartesianCoordinates.Velocity = Vector<double>.Build.Dense(3);
+                                    }
                                 }
                             }
-                        };
-                        stateRetriever.State = intState;
-                        stateRetriever.GetHelioCentricState(depth);
-                        intState.Coordinates.CartesianCoordinates.Negative(); //BETTERME
-                        cartesianCoordinates.Position = intState.Coordinates.CartesianCoordinates.Position;
-                        if (depth == Depth.Velocity)
-                        {
-                            cartesianCoordinates.Velocity = intState.Coordinates.CartesianCoordinates.Velocity;
                         }
-                    }
+                    }                
                 }
                 if (CoordinatesNeeded.BodyCentric)
                 {
-                    BodyCentricCoordinates bodyCentricCoordinates = stateCoordinates.BodyCentricCoordinates;
-                    if (bodyCentricCoordinates == null || bodyCentricCoordinates.CentreBody == null || bodyCentricCoordinates.BodyFrame == null)
-                    {
-                        throw new ArgumentNullException();
-                    }
-                    Body centreBody = bodyCentricCoordinates.CentreBody.Value;
-                    if (centreBody != CelestialObjects.Body.Sun)
-                    {
-                        //GetBodyCentricState(body);
-                    }
+
                 }
             }
         }

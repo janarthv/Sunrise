@@ -8,7 +8,7 @@ namespace Sunrise.Generic.States
     {
         public void GetBodyFixedState(Depth depth)
         {
-            Coordinates coordinates = State.Coordinates;
+            //Coordinates coordinates = State.Coordinates;
         }
     }
 }

@@ -30,6 +30,12 @@ namespace Sunrise.Generic
         public Body? Origin { get; set; }
     }
 
+    public enum KeplerianDepth
+    {
+        PlaneOnly,
+        Exact,
+    }
+
     public class KeplerianCoordinates : BasicCoordinates
     {
         public double SMA { get; set; }
@@ -38,6 +44,7 @@ namespace Sunrise.Generic
         public double RAAN { get; set; }
         public double ArgPer { get; set; }
         public double TA { get; set; }
+        public KeplerianDepth Depth { get; set; }
 
         public KeplerianCoordinates()
         {
@@ -61,8 +68,16 @@ namespace Sunrise.Generic
         }
     }
 
+    public enum CartesianDepth
+    {
+        Position,
+        Velocity,
+        Acceleration,
+    }
+
     public class CartesianCoordinates : BasicCoordinates
     {
+        public CartesianDepth Depth { get; set; }
         private Vector<double> _pos;
         public Vector<double> Position
         {
@@ -107,12 +122,13 @@ namespace Sunrise.Generic
 
         }
 
-        public CartesianCoordinates(Vector<double> position, Vector<double> velocity, Frame frame, Body origin)
+        public CartesianCoordinates(Vector<double> position, Vector<double> velocity, Frame frame, Body origin, CartesianDepth depth)
         {
             CoordinateFrame = frame;
             Origin = origin;
             Position = position;
             Velocity = velocity;
+            Depth = depth;
         }
 
         internal void CheckValidity()
@@ -210,107 +226,152 @@ namespace Sunrise.Generic
         }
     }
 
-    public class Coordinates
+    public static class CoordinateTransformations
     {
-        public Body? Body { get; set; }
-        public KeplerianCoordinates KeplerianCoordinates { get; set; }
-        public IEnumerable<CartesianCoordinates> CartesianCoordinates { get; set; }
-        public BodyCentricCoordinates BodyCentricCoordinates { get; set; }
-        public IEnumerable<TopoCentricCoordinates> TopoCentricCoordinates { get; set; }
-
-        internal void ConvertKeplerianToCartesian()
+        internal static void ConvertKeplerianToCartesian(KeplerianCoordinates keplerianCoordinates, CartesianCoordinates cartesianCoordinates)
         {
             try
             {
-                CheckKeplerianCoordinatesValidity();
-                CheckCartesianCoordinatesValidity();
+                CheckKeplerianCoordinatesValidity(keplerianCoordinates);
+                CheckCartesianCoordinatesValidity(cartesianCoordinates);
             }
             catch
             {
                 throw new InvalidOperationException();
             }
-            if (KeplerianCoordinates.CoordinateFrame != CartesianCoordinates.CoordinateFrame || KeplerianCoordinates.Origin == null)
+            if (keplerianCoordinates.CoordinateFrame != cartesianCoordinates.CoordinateFrame || keplerianCoordinates.Origin == null)
             {
                 throw new InvalidOperationException();
             }
 
             //FIXME
-            CartesianCoordinates = new CartesianCoordinates
+            cartesianCoordinates = new CartesianCoordinates
             {
-                Origin = KeplerianCoordinates.Origin,
-                CoordinateFrame = KeplerianCoordinates.CoordinateFrame,
+                Origin = keplerianCoordinates.Origin,
+                CoordinateFrame = keplerianCoordinates.CoordinateFrame,
                 Position = Vector<double>.Build.Random(3),
                 Velocity = Vector<double>.Build.Random(3),
             };
         }
 
-        private void CheckCartesianCoordinatesValidity()
+        private static void CheckCartesianCoordinatesValidity(CartesianCoordinates cartesianCoordinates)
         {
-            if (CartesianCoordinates == null || CartesianCoordinates.CoordinateFrame == null)
+            if (cartesianCoordinates == null || cartesianCoordinates.CoordinateFrame == null)
             {
                 throw new ArgumentNullException();
             }
         }
 
-        private void CheckKeplerianCoordinatesValidity()
+        private static void CheckKeplerianCoordinatesValidity(KeplerianCoordinates keplerianCoordinates)
         {
-            if (KeplerianCoordinates == null || KeplerianCoordinates.CoordinateFrame == null)
+            if (keplerianCoordinates == null || keplerianCoordinates.CoordinateFrame == null)
             {
                 throw new ArgumentNullException();
             }
         }
-
-        //public void CheckValidity()
-        //{
-        //    string errorMessage = "Coordinates.CheckValidity():";
-        //    if (Type == CoordinateType.Keplerian)
-        //    {
-        //        try
-        //        {
-        //            KeplerianCoordinates.CheckValidity();
-        //        }
-        //        catch
-        //        {
-        //            errorMessage += "Invalid Keplerian coordinates";
-        //            throw new ArgumentException(errorMessage);
-        //        }
-        //    }
-        //    else if (Type == CoordinateType.Cartesian)
-        //    {
-        //        try
-        //        {
-        //            CartesianCoordinates.CheckValidity();
-        //        }
-        //        catch
-        //        {
-        //            errorMessage += "Invalid Cartesian coordinates";
-        //            throw new ArgumentException(errorMessage);
-        //        }
-        //    }
-        //    else if (Type == CoordinateType.BodyCentric)
-        //    {
-        //        try
-        //        {
-        //            BodyCentricCoordinates.CheckValidity();
-        //        }
-        //        catch
-        //        {
-        //            errorMessage += "Invalid BodyCentric coordinates";
-        //            throw new ArgumentException(errorMessage);
-        //        }
-        //    }
-        //    else if (Type == CoordinateType.TopoCentric)
-        //    {
-        //        try
-        //        {
-        //            TopoCentricCoordinates.CheckValidity();
-        //        }
-        //        catch
-        //        {
-        //            errorMessage += "Invalid TopoCentric coordinates";
-        //            throw new ArgumentException(errorMessage);
-        //        }
-        //    }
-        //}
     }
+
+    //public class Coordinates
+    //{
+    //    public Body? Body { get; set; }
+    //    public KeplerianCoordinates KeplerianCoordinates { get; set; }
+    //    public IEnumerable<CartesianCoordinates> CartesianCoordinates { get; set; }
+    //    public BodyCentricCoordinates BodyCentricCoordinates { get; set; }
+    //    public IEnumerable<TopoCentricCoordinates> TopoCentricCoordinates { get; set; }
+
+    //    //internal void ConvertKeplerianToCartesian()
+    //    //{
+    //    //    try
+    //    //    {
+    //    //        CheckKeplerianCoordinatesValidity();
+    //    //        CheckCartesianCoordinatesValidity();
+    //    //    }
+    //    //    catch
+    //    //    {
+    //    //        throw new InvalidOperationException();
+    //    //    }
+    //    //    if (KeplerianCoordinates.CoordinateFrame != CartesianCoordinates.CoordinateFrame || KeplerianCoordinates.Origin == null)
+    //    //    {
+    //    //        throw new InvalidOperationException();
+    //    //    }
+
+    //    //    //FIXME
+    //    //    CartesianCoordinates = new CartesianCoordinates
+    //    //    {
+    //    //        Origin = KeplerianCoordinates.Origin,
+    //    //        CoordinateFrame = KeplerianCoordinates.CoordinateFrame,
+    //    //        Position = Vector<double>.Build.Random(3),
+    //    //        Velocity = Vector<double>.Build.Random(3),
+    //    //    };
+    //    //}
+
+    //    //private void CheckCartesianCoordinatesValidity()
+    //    //{
+    //    //    if (CartesianCoordinates == null || CartesianCoordinates.CoordinateFrame == null)
+    //    //    {
+    //    //        throw new ArgumentNullException();
+    //    //    }
+    //    //}
+
+    //    //private void CheckKeplerianCoordinatesValidity()
+    //    //{
+    //    //    if (KeplerianCoordinates == null || KeplerianCoordinates.CoordinateFrame == null)
+    //    //    {
+    //    //        throw new ArgumentNullException();
+    //    //    }
+    //    //}
+
+    //    //public void CheckValidity()
+    //    //{
+    //    //    string errorMessage = "Coordinates.CheckValidity():";
+    //    //    if (Type == CoordinateType.Keplerian)
+    //    //    {
+    //    //        try
+    //    //        {
+    //    //            KeplerianCoordinates.CheckValidity();
+    //    //        }
+    //    //        catch
+    //    //        {
+    //    //            errorMessage += "Invalid Keplerian coordinates";
+    //    //            throw new ArgumentException(errorMessage);
+    //    //        }
+    //    //    }
+    //    //    else if (Type == CoordinateType.Cartesian)
+    //    //    {
+    //    //        try
+    //    //        {
+    //    //            CartesianCoordinates.CheckValidity();
+    //    //        }
+    //    //        catch
+    //    //        {
+    //    //            errorMessage += "Invalid Cartesian coordinates";
+    //    //            throw new ArgumentException(errorMessage);
+    //    //        }
+    //    //    }
+    //    //    else if (Type == CoordinateType.BodyCentric)
+    //    //    {
+    //    //        try
+    //    //        {
+    //    //            BodyCentricCoordinates.CheckValidity();
+    //    //        }
+    //    //        catch
+    //    //        {
+    //    //            errorMessage += "Invalid BodyCentric coordinates";
+    //    //            throw new ArgumentException(errorMessage);
+    //    //        }
+    //    //    }
+    //    //    else if (Type == CoordinateType.TopoCentric)
+    //    //    {
+    //    //        try
+    //    //        {
+    //    //            TopoCentricCoordinates.CheckValidity();
+    //    //        }
+    //    //        catch
+    //    //        {
+    //    //            errorMessage += "Invalid TopoCentric coordinates";
+    //    //            throw new ArgumentException(errorMessage);
+    //    //        }
+    //    //    }
+    //    //}
+    //}
 }

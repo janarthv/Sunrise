@@ -30,44 +30,52 @@ namespace Sunrise.Astronomy.RiseSet
             DateTime date = TimeFrom;
             //while (date <= TimeTo)
             //{
+            KeplerianCoordinates keplerianCoordinates = new KeplerianCoordinates
+            {
+                Origin = Body.Sun,
+                CoordinateFrame = Frame.EME2000,
+            };
+            CoordinatesNeeded coordinatesNeeded = new CoordinatesNeeded
+            {
+                Keplerian = false,
+                Cartesian = true,
+            };
+            CartesianCoordinates cartesianCoordinates = new CartesianCoordinates
+            {
+                //Origin = Body.Sun,
+                CoordinateFrame = Frame.EME2000,
+            };
+            Coordinates coordinates = new Coordinates
+            {
+                KeplerianCoordinates = keplerianCoordinates,
+                CartesianCoordinates = new List<CartesianCoordinates>
+                {
+                    cartesianCoordinates,
+                }
+            };
+            List<Coordinates> coordinatesSet = new List<Coordinates>
+            {
+                coordinates,
+            };
             StateRetriever stateRetriever = new StateRetriever
             {
                 Body = Body.Sun,
-                CoordinatesNeeded = new CoordinatesNeeded
-                {
-                    Keplerian = false,
-                    Cartesian = true,
-                },
+                CoordinatesNeeded = coordinatesNeeded,
                 State = new State
                 {
                     Epoch = date,
-                    CoordinatesSet = new Dictionary<Body, Coordinates>
+                    CoordinatesSet = new List<Coordinates>
                     {
-                        {
-                            Body.Sun,
-                            new Coordinates
-                            {
-                                Body = Body.Earth,
-                                KeplerianCoordinates = new KeplerianCoordinates
-                                {
-                                    CoordinateFrame = Frame.EME2000,
-                                },
-                                CartesianCoordinates = new List<CartesianCoordinates>
-                                {
-                                    new CartesianCoordinates
-                                    {
-                                        CoordinateFrame = Frame.EME2000,
-                                    },
-                                    new CartesianCoordinates
-                                    {
-                                        CoordinateFrame = Frame.ECEF,
-                                    },
-                                },
-                            }
-                        },
+                        coordinates,
                     },
                 },
             };
+            Earth.GetHelioCentricKeplerianElements(date, ref keplerianCoordinates);
+            keplerianCoordinates.ArgPer = 0;
+            keplerianCoordinates.Origin = null;
+            StateRetriever.GetHelioCentricKeplerianElements(Body.Earth, date, ref keplerianCoordinates);
+            //Start testing this one
+            StateRetriever.GetHelioCentricState(Body.Earth, date, coordinates);
             //stateRetriever.GetState(Depth.Position);
             //stateRetriever.GetBodyCentricState();
             //stateRetriever.GetHelioCentricState(Depth.Position);

@@ -6,48 +6,37 @@ namespace Sunrise.Generic.States
 {
     public partial class StateRetriever
     {
-        public void GetHelioCentricState(Depth depth)
+        public static void GetHelioCentricState(Body body, DateTime epoch, Coordinates coordinates)
         {
-            if (Body == CelestialObjects.Body.Sun)
+            /*
+             * Possible use would be : get for a satellite several heliocentric states in different frames, though it is doubtful one would ever need this.
+             * Normally, you would expect to retrieve one set of Keplerian and Cartesian state with same frame
+             */
+            KeplerianCoordinates keplerianCoordinates = coordinates.KeplerianCoordinates;
+            if (coordinates.CoordinatesNeeded.Keplerian)
             {
-                throw new InvalidOperationException();
+                GetHelioCentricKeplerianElements(body, epoch, ref keplerianCoordinates);
             }
-            Coordinates coordinates = State.Coordinates;
-            if (CoordinatesNeeded.Keplerian)
-            {
-                GetHelioCentricKeplerianElements();
-            }
-            if (CoordinatesNeeded.Cartesian)
-            {
-                CartesianCoordinates cartesianCoordinates = coordinates.CartesianCoordinates;
-                KeplerianCoordinates keplerianCoordinates = coordinates.KeplerianCoordinates;
 
-                if (keplerianCoordinates == null || keplerianCoordinates.Origin != CelestialObjects.Body.Sun && keplerianCoordinates.CoordinateFrame != cartesianCoordinates.CoordinateFrame)
+            if (coordinates.CoordinatesNeeded.Cartesian)
+            {
+                KeplerianCoordinates dummyKeplerianCoordinates;
+                foreach (CartesianCoordinates cartesianCoordinates in coordinates.CartesianCoordinates)
                 {
-                    State intState = new State
+                    if (keplerianCoordinates == null || keplerianCoordinates.CoordinateFrame != cartesianCoordinates.CoordinateFrame)//TESTME sending a nonnull KeplerianCoord with a null coordinate frame
                     {
-                        Epoch = State.Epoch,
-                        Coordinates = new Coordinates
+                        dummyKeplerianCoordinates = new KeplerianCoordinates
                         {
-                            KeplerianCoordinates = new KeplerianCoordinates
-                            {
-                                CoordinateFrame = cartesianCoordinates.CoordinateFrame,
-                            }
-                        }
-                    };
-                    StateRetriever stateRetriever = new StateRetriever
+                            CoordinateFrame = cartesianCoordinates.CoordinateFrame
+                        };
+                        GetHelioCentricKeplerianElements(body,epoch, ref dummyKeplerianCoordinates);
+                    }
+                    else
                     {
-                        Body = Body,
-                        CoordinatesNeeded = new CoordinatesNeeded
-                        {
-                            Keplerian = true,
-                        },
-                        State = intState,
-                    };
-                    stateRetriever.GetHelioCentricKeplerianElements();
-                    coordinates.KeplerianCoordinates = intState.Coordinates.KeplerianCoordinates;
+                        dummyKeplerianCoordinates = keplerianCoordinates;
+                    }
+                    CoordinateTransformations.ConvertKeplerianToCartesian(dummyKeplerianCoordinates,cartesianCoordinates);
                 }
-                coordinates.ConvertKeplerianToCartesian();
             }
             else
             {
@@ -55,15 +44,15 @@ namespace Sunrise.Generic.States
             }
         }
 
-        public void GetHelioCentricKeplerianElements()
+        public static void GetHelioCentricKeplerianElements(Body body, DateTime epoch, ref KeplerianCoordinates keplerianCoordinates)
         {
-            if (Body == CelestialObjects.Body.Sun)
+            if (body == CelestialObjects.Body.Sun)
             {
                 throw new InvalidOperationException();
             }
-            if (Body == CelestialObjects.Body.Earth)
+            if (body == CelestialObjects.Body.Earth)
             {
-                Earth.GetHelioCentricKeplerianElements(State);
+                Earth.GetHelioCentricKeplerianElements(epoch, ref keplerianCoordinates);
             }
             else
             {
