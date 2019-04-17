@@ -108,7 +108,7 @@ namespace Sunrise.Generic
             {
                 if (value.Count() != 3)
                 {
-                    throw new ArgumentException("Position vector should a vector double of length 3");
+                    throw new ArgumentException("Velocity vector should a vector double of length 3");
                 }
                 else
                 {
@@ -239,24 +239,20 @@ namespace Sunrise.Generic
             {
                 throw new InvalidOperationException();
             }
-            if (keplerianCoordinates.CoordinateFrame != cartesianCoordinates.CoordinateFrame || keplerianCoordinates.Origin == null)
-            {
-                throw new InvalidOperationException();
-            }
 
             //FIXME
-            cartesianCoordinates = new CartesianCoordinates
+            //cartesianCoordinates.Origin = keplerianCoordinates.Origin;
+
+            cartesianCoordinates.Position = Vector<double>.Build.Random(3);
+            if (cartesianCoordinates.Depth >= CartesianDepth.Velocity)
             {
-                Origin = keplerianCoordinates.Origin,
-                CoordinateFrame = keplerianCoordinates.CoordinateFrame,
-                Position = Vector<double>.Build.Random(3),
-                Velocity = Vector<double>.Build.Random(3),
-            };
+                cartesianCoordinates.Velocity = Vector<double>.Build.Random(3);
+            }
         }
 
         private static void CheckCartesianCoordinatesValidity(CartesianCoordinates cartesianCoordinates)
         {
-            if (cartesianCoordinates == null || cartesianCoordinates.CoordinateFrame == null)
+            if (cartesianCoordinates == null)
             {
                 throw new ArgumentNullException();
             }
@@ -264,7 +260,7 @@ namespace Sunrise.Generic
 
         private static void CheckKeplerianCoordinatesValidity(KeplerianCoordinates keplerianCoordinates)
         {
-            if (keplerianCoordinates == null || keplerianCoordinates.CoordinateFrame == null)
+            if (keplerianCoordinates == null)
             {
                 throw new ArgumentNullException();
             }

@@ -11,6 +11,7 @@ namespace Sunrise.CelestialObjects
         Dummy,
         Sun,
         Earth,
+        Moon,
     }
 
     public class CelestialBody
@@ -20,7 +21,7 @@ namespace Sunrise.CelestialObjects
         public IEnumerable<Frame> Frames { get; set; }
     }
 
-    public static partial class CelestialBodies
+    public static class CelestialBodies
     {
         public static readonly CelestialBody Sun = new CelestialBody
         {

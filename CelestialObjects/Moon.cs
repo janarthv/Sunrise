@@ -7,7 +7,7 @@ using Sunrise.Math;
 
 namespace Sunrise.CelestialObjects
 {
-    public static class Earth
+    public static class Moon
     {
         public static void GetHelioCentricKeplerianElements(DateTime epoch, KeplerianCoordinates keplerianCoordinates)
         {            
@@ -19,7 +19,7 @@ namespace Sunrise.CelestialObjects
             {
                 KeplerianCoordinates dummy = new KeplerianCoordinates
                 {
-                    SMA = 1.00000011 * Constants.AU,
+                    SMA = 2.00000011 * Constants.AU,
                     Ecc = 0.01671022,
                     Inc = BasicMath.DegreeToRadian(0.00005),
                     RAAN = BasicMath.DegreeToRadian(-11.26064),

@@ -55,13 +55,19 @@ namespace Sunrise.Generic.States
 
     public class State
     {
-        public Body Body { get; set; }
+        public Body? Body { get; set; }
         public DateTime Epoch { get; set; }
         public IEnumerable<Coordinates> CoordinatesSet { get; set; }
 
         public void CheckValidity()
         {
             string errorMessage = "State.CheckValidity():";
+
+            if (Body == null)
+            {
+                errorMessage += "State body";
+                throw new ArgumentNullException(errorMessage);
+            }
 
             if (Epoch == null)
             {

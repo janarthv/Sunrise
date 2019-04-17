@@ -32,51 +32,72 @@ namespace Sunrise.Astronomy.RiseSet
             //{
             KeplerianCoordinates keplerianCoordinates = new KeplerianCoordinates
             {
-                Origin = Body.Sun,
+                Origin = Body.Earth,
                 CoordinateFrame = Frame.EME2000,
             };
             CoordinatesNeeded coordinatesNeeded = new CoordinatesNeeded
             {
-                Keplerian = false,
+                Keplerian = true,
                 Cartesian = true,
             };
             CartesianCoordinates cartesianCoordinates = new CartesianCoordinates
             {
-                //Origin = Body.Sun,
+                Origin = Body.Earth,
                 CoordinateFrame = Frame.EME2000,
             };
-            Coordinates coordinates = new Coordinates
+            CartesianCoordinates moonCartesianCoordinates = new CartesianCoordinates
             {
-                KeplerianCoordinates = keplerianCoordinates,
+                Origin = Body.Moon,
+                CoordinateFrame = Frame.EME2000,
+            };
+            KeplerianCoordinates moonKeplerianCoordinates = new KeplerianCoordinates
+            {
+                Origin = Body.Moon,
+                CoordinateFrame = Frame.EME2000,
+            };
+            Coordinates earthCoordinates = new Coordinates
+            {
+                Body = Body.Earth,
+                CoordinatesNeeded = coordinatesNeeded,
+                KeplerianCoordinates = null,
                 CartesianCoordinates = new List<CartesianCoordinates>
                 {
                     cartesianCoordinates,
                 }
             };
+            Coordinates moonCoordinates = new Coordinates
+            {
+                Body = Body.Moon,
+                CoordinatesNeeded = coordinatesNeeded,
+                KeplerianCoordinates = moonKeplerianCoordinates,
+                CartesianCoordinates = new List<CartesianCoordinates>
+                {
+                    moonCartesianCoordinates,
+                }
+            };
             List<Coordinates> coordinatesSet = new List<Coordinates>
             {
-                coordinates,
+                earthCoordinates,
+                moonCoordinates,
             };
             StateRetriever stateRetriever = new StateRetriever
             {
-                Body = Body.Sun,
                 CoordinatesNeeded = coordinatesNeeded,
                 State = new State
                 {
+                    Body = Body.Sun,
                     Epoch = date,
-                    CoordinatesSet = new List<Coordinates>
-                    {
-                        coordinates,
-                    },
+                    CoordinatesSet = coordinatesSet,
                 },
             };
-            Earth.GetHelioCentricKeplerianElements(date, ref keplerianCoordinates);
-            keplerianCoordinates.ArgPer = 0;
-            keplerianCoordinates.Origin = null;
-            StateRetriever.GetHelioCentricKeplerianElements(Body.Earth, date, ref keplerianCoordinates);
+            //Earth.GetHelioCentricKeplerianElements(date, keplerianCoordinates);
+            //keplerianCoordinates.ArgPer = 0;
+            //keplerianCoordinates.Origin = null;
+            //StateRetriever.GetHelioCentricKeplerianElements(Body.Earth, date, keplerianCoordinates);
             //Start testing this one
-            StateRetriever.GetHelioCentricState(Body.Earth, date, coordinates);
-            //stateRetriever.GetState(Depth.Position);
+            //coordinates.KeplerianCoordinates = null;
+            StateRetriever.GetHelioCentricState(date, moonCoordinates);
+            stateRetriever.GetState();
             //stateRetriever.GetBodyCentricState();
             //stateRetriever.GetHelioCentricState(Depth.Position);
             //State bodyState = new State
