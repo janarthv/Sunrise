@@ -96,8 +96,11 @@ namespace Sunrise.Astronomy.RiseSet
             //StateRetriever.GetHelioCentricKeplerianElements(Body.Earth, date, keplerianCoordinates);
             //Start testing this one
             //coordinates.KeplerianCoordinates = null;
-            StateRetriever.GetHelioCentricState(date, moonCoordinates);
-            stateRetriever.GetState();
+            //StateRetriever.GetHelioCentricState(date, moonCoordinates);
+            //stateRetriever.GetState();
+            DefaultState defaultState = Sun.GetDefaultState(date);
+            defaultState = null;
+            defaultState = Earth.GetDefaultState(date);
             //stateRetriever.GetBodyCentricState();
             //stateRetriever.GetHelioCentricState(Depth.Position);
             //State bodyState = new State

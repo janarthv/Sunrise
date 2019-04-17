@@ -41,8 +41,23 @@ namespace Sunrise.CelestialObjects
             Frames = new List<Frame>
             {
                 Frame.ECEF,
-            },
-            
+            },            
         };
+
+        public static DefaultState GetDefaultState(Body body, DateTime epoch)
+        {
+            if (body == Body.Sun)
+            {
+                return CelestialObjects.Sun.GetDefaultState(epoch);
+            }
+            else if (body == Body.Earth)
+            {
+                return CelestialObjects.Earth.GetDefaultState(epoch);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 }

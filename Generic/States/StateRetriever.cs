@@ -25,70 +25,63 @@ namespace Sunrise.Generic.States
                 throw new ArgumentNullException();
             }
             State.CheckValidity();
-            if (State.Body == Body.Sun)
+            Body body = State.Body.Value;
+            foreach (Coordinates coordinates in State.CoordinatesSet)
             {
-                if (CoordinatesNeeded.Keplerian)
+                Body origin = coordinates.Body.Value;
+                CoordinatesNeeded localCoordinatesNeeded = coordinates.CoordinatesNeeded;
+                if (CoordinatesNeeded.Keplerian && (localCoordinatesNeeded == null || localCoordinatesNeeded.Keplerian))
                 {
-                    throw new NotImplementedException();
+                    
                 }
-                if (CoordinatesNeeded.Cartesian)
+                if (CoordinatesNeeded.Cartesian && (localCoordinatesNeeded == null || localCoordinatesNeeded.Cartesian))
                 {
-                    foreach (Coordinates stateCoordinates in State.CoordinatesSet)
+                    foreach (CartesianCoordinates cartesianCoordinates in coordinates.CartesianCoordinates)
                     {
-                        if (stateCoordinates.CoordinatesNeeded == null || stateCoordinates.CoordinatesNeeded.Cartesian)
+                        if (cartesianCoordinates == null || cartesianCoordinates.CoordinateFrame == null)
                         {
-                            foreach (CartesianCoordinates cartesianCoordinates in stateCoordinates.CartesianCoordinates)
+                            throw new ArgumentNullException();
+                        }
+                        cartesianCoordinates.Origin = origin;
+                        if (origin != body)
+                        {
+                            CartesianCoordinates dummyCartesianCoordinates = new CartesianCoordinates
                             {
-                                if (cartesianCoordinates == null || cartesianCoordinates.Origin == null || cartesianCoordinates.CoordinateFrame == null)
+                                Depth = cartesianCoordinates.Depth,
+                                CoordinateFrame = cartesianCoordinates.CoordinateFrame,
+                            };
+                            Coordinates dummyCoordinates = new Coordinates
+                            {
+                                Body = origin,
+                                CoordinatesNeeded = new CoordinatesNeeded
                                 {
-                                    throw new ArgumentNullException();
-                                }
-                                Body origin = cartesianCoordinates.Origin.Value;
-                                if (origin != Body.Sun)
-                                {
-                                    CartesianCoordinates dummyCartesianCoordinates = new CartesianCoordinates
-                                    {
-                                        Depth = cartesianCoordinates.Depth,
-                                        CoordinateFrame = cartesianCoordinates.CoordinateFrame,
-                                    };
-                                    Coordinates dummyCoordinates = new Coordinates
-                                    {
-                                        Body = origin,
-                                        CoordinatesNeeded = new CoordinatesNeeded
-                                        {
-                                            Cartesian = true,                                            
-                                        },
-                                        KeplerianCoordinates = stateCoordinates.KeplerianCoordinates,
-                                        CartesianCoordinates = new List<CartesianCoordinates>
+                                    Cartesian = true,
+                                },
+                                KeplerianCoordinates = coordinates.KeplerianCoordinates,
+                                CartesianCoordinates = new List<CartesianCoordinates>
                                         {
                                             dummyCartesianCoordinates,
                                         }
-                                    };
-                                    GetHelioCentricState(State.Epoch, dummyCoordinates);
-                                    dummyCartesianCoordinates.Negative(); //BETTERME
-                                    cartesianCoordinates.Position = dummyCartesianCoordinates.Position;
-                                    if (cartesianCoordinates.Depth >= CartesianDepth.Velocity)
-                                    {
-                                        cartesianCoordinates.Velocity = dummyCartesianCoordinates.Velocity;
-                                    }
-                                }
-                                else
-                                {
-                                    cartesianCoordinates.Position = Vector<double>.Build.Dense(3);
-                                    if (cartesianCoordinates.Depth >= CartesianDepth.Velocity)
-                                    {
-                                        cartesianCoordinates.Velocity = Vector<double>.Build.Dense(3);
-                                    }
-                                }
+                            };
+                            GetHelioCentricState(State.Epoch, dummyCoordinates);
+                            dummyCartesianCoordinates.Negative(); //BETTERME
+                            cartesianCoordinates.Position = dummyCartesianCoordinates.Position;
+                            if (cartesianCoordinates.Depth >= CartesianDepth.Velocity)
+                            {
+                                cartesianCoordinates.Velocity = dummyCartesianCoordinates.Velocity;
                             }
                         }
-                    }                
+                        else
+                        {
+                            cartesianCoordinates.Position = Vector<double>.Build.Dense(3);
+                            if (cartesianCoordinates.Depth >= CartesianDepth.Velocity)
+                            {
+                                cartesianCoordinates.Velocity = Vector<double>.Build.Dense(3);
+                            }
+                        }
+                    }
                 }
-                if (CoordinatesNeeded.BodyCentric)
-                {
-
-                }
-            }
+            }                
         }
     }
 }

@@ -241,7 +241,8 @@ namespace Sunrise.Generic
             }
 
             //FIXME
-            //cartesianCoordinates.Origin = keplerianCoordinates.Origin;
+            cartesianCoordinates.Origin = keplerianCoordinates.Origin;
+            cartesianCoordinates.CoordinateFrame = keplerianCoordinates.CoordinateFrame;
 
             cartesianCoordinates.Position = Vector<double>.Build.Random(3);
             if (cartesianCoordinates.Depth >= CartesianDepth.Velocity)
