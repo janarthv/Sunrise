@@ -26,8 +26,8 @@ namespace Sunrise.Generic.States
             state.CheckValidity();
 
             Body body = state.Body.Value;
-            DefaultState defaultState = CelestialBodies.GetDefaultState(body);
-            bodyDefaultStates.Add(body, defaultState);
+            DefaultState bodyDefaultState = CelestialBodies.GetDefaultState(body);
+            bodyDefaultStates.Add(body, bodyDefaultState);
 
             foreach (Coordinates coordinates in state.CoordinatesSet)
             {
@@ -43,7 +43,7 @@ namespace Sunrise.Generic.States
                 }
 
                 DefaultState originDefaultState;
-                if (defaultState.Coordinates.Body != origin)
+                if (bodyDefaultState.Coordinates.Body != origin)
                 {
                     originDefaultState = CelestialBodies.GetDefaultState(origin);
                     bodyDefaultStates.Add(origin, originDefaultState);
@@ -53,7 +53,17 @@ namespace Sunrise.Generic.States
 
                 if (coordinatesNeeded.Keplerian)
                 {
-
+                    //Earth-Sun
+                    if (bodyDefaultState.Coordinates.Body == origin)
+                    {
+                        if (bodyDefaultState.CoordinateType == CoordinateType.Keplerian)
+                        {
+                            CoordinateTransformations.ConvertKeplerianFrame(bodyDefaultState.Coordinates.KeplerianCoordinates,coordinates.KeplerianCoordinates);
+                        }
+                    }
+                    //Sun-Earth
+                    //Moon-Sun
+                    //Sun-Moon
                 }
                 if (coordinatesNeeded.Cartesian)
                 {

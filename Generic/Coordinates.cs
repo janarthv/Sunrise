@@ -228,6 +228,11 @@ namespace Sunrise.Generic
 
     public static class CoordinateTransformations
     {
+        internal static void ConvertKeplerianFrame(KeplerianCoordinates keplerianCoordinates1, KeplerianCoordinates keplerianCoordinates2)
+        {
+            throw new NotImplementedException();
+        }
+
         internal static void ConvertKeplerianToCartesian(KeplerianCoordinates keplerianCoordinates, CartesianCoordinates cartesianCoordinates)
         {
             try
