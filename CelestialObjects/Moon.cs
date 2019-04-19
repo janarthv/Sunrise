@@ -9,7 +9,36 @@ namespace Sunrise.CelestialObjects
 {
     public static class Moon
     {
-        public static void GetHelioCentricKeplerianElements(DateTime epoch, KeplerianCoordinates keplerianCoordinates)
+        public static DefaultState GetDefaultState(DateTime? epoch = null)
+        {
+            KeplerianCoordinates keplerianCoordinates = new KeplerianCoordinates
+            {
+                CoordinateFrame = Frame.EME2000,
+                Origin = Body.Earth,
+            };
+            Coordinates coordinates = new Coordinates
+            {
+                Body = Body.Earth,
+                KeplerianCoordinates = keplerianCoordinates,
+            };
+            DefaultState defaultState = new DefaultState
+            {
+                CoordinateType = CoordinateType.Keplerian,
+                Coordinates = coordinates,
+            };
+            if (epoch == null)
+            {
+                return defaultState;
+            }
+            else
+            {
+                GetEarthCentricKeplerianElements(epoch.Value, keplerianCoordinates);
+                defaultState.Epoch = epoch.Value;
+                return defaultState;
+            }
+        }
+
+        public static void GetEarthCentricKeplerianElements(DateTime epoch, KeplerianCoordinates keplerianCoordinates)
         {            
             if (keplerianCoordinates == null || keplerianCoordinates.CoordinateFrame == null)
             {
@@ -25,7 +54,7 @@ namespace Sunrise.CelestialObjects
                     RAAN = BasicMath.DegreeToRadian(-11.26064),
                     ArgPer = BasicMath.DegreeToRadian(102.94719),
                     TA = BasicMath.DegreeToRadian(100.46435),
-                    Origin = Body.Sun,
+                    Origin = Body.Earth,
                     CoordinateFrame = Frame.EME2000,
                 };
                 keplerianCoordinates.SMA = dummy.SMA;

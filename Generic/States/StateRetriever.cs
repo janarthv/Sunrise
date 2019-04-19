@@ -13,28 +13,49 @@ namespace Sunrise.Generic.States
         Acceleration,
     }
 
-    public partial class StateRetriever
+    public static partial class StateRetriever
     {
-        public State State { get; set; }
-        public CoordinatesNeeded CoordinatesNeeded { get; set; }
-
-        public void GetState()
+        private static Dictionary<Body, DefaultState> bodyDefaultStates = new Dictionary<Body, DefaultState>();
+         
+        public static void GetState(State state)
         {
-            if (State == null || CoordinatesNeeded == null)
+            if (state == null)
             {
                 throw new ArgumentNullException();
             }
-            State.CheckValidity();
-            Body body = State.Body.Value;
-            foreach (Coordinates coordinates in State.CoordinatesSet)
+            state.CheckValidity();
+
+            Body body = state.Body.Value;
+            DefaultState defaultState = CelestialBodies.GetDefaultState(body);
+            bodyDefaultStates.Add(body, defaultState);
+
+            foreach (Coordinates coordinates in state.CoordinatesSet)
             {
-                Body origin = coordinates.Body.Value;
-                CoordinatesNeeded localCoordinatesNeeded = coordinates.CoordinatesNeeded;
-                if (CoordinatesNeeded.Keplerian && (localCoordinatesNeeded == null || localCoordinatesNeeded.Keplerian))
+                if (coordinates.CoordinatesNeeded == null || coordinates.Body == null)
                 {
-                    
+                    throw new ArgumentNullException();
                 }
-                if (CoordinatesNeeded.Cartesian && (localCoordinatesNeeded == null || localCoordinatesNeeded.Cartesian))
+
+                Body origin = coordinates.Body.Value;
+                if (origin == body)
+                {
+                    throw new InvalidOperationException();
+                }
+
+                DefaultState originDefaultState;
+                if (defaultState.Coordinates.Body != origin)
+                {
+                    originDefaultState = CelestialBodies.GetDefaultState(origin);
+                    bodyDefaultStates.Add(origin, originDefaultState);
+                }
+
+                CoordinatesNeeded coordinatesNeeded = coordinates.CoordinatesNeeded;
+
+                if (coordinatesNeeded.Keplerian)
+                {
+
+                }
+                if (coordinatesNeeded.Cartesian)
                 {
                     foreach (CartesianCoordinates cartesianCoordinates in coordinates.CartesianCoordinates)
                     {

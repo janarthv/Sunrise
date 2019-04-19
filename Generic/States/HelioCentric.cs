@@ -60,9 +60,9 @@ namespace Sunrise.Generic.States
             {
                 Earth.GetHelioCentricKeplerianElements(epoch, keplerianCoordinates);
             } 
-            else if (body == CelestialObjects.Body.Moon)
+            else 
             {
-                Moon.GetHelioCentricKeplerianElements(epoch, keplerianCoordinates);
+                throw new NotImplementedException();
             }
         }
     }

@@ -75,7 +75,7 @@ namespace Sunrise.Generic.States
                 throw new ArgumentNullException(errorMessage);
             }
 
-            if (!CoordinatesSet.Any() || CoordinatesSet.Any( x => x == null))
+            if (CoordinatesSet == null || !CoordinatesSet.Any() || CoordinatesSet.Any( x => x == null))
             {
                 errorMessage += "State coordinates";
                 throw new ArgumentNullException("State coordinates");

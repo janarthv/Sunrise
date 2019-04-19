@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using MathNet.Numerics.LinearAlgebra;
 using Sunrise.Generic;
 using Sunrise.Generic.Frames;
@@ -7,35 +8,57 @@ using Sunrise.Math;
 
 namespace Sunrise.CelestialObjects
 {
-    public enum CoordinateType
-    {
-        Cartesian,
-        Keplerian,
-    }
     public class DefaultState
     {
-        public DateTime Epoch { get; set; }
+        public DateTime? Epoch { get; set; }
         public CoordinateType CoordinateType { get; set; }
-        public KeplerianCoordinates KeplerianCoordinates { get; set; }
-        public CartesianCoordinates CartesianCoordinates { get; set; }
+        public Coordinates Coordinates { get; set; }
     }
+
     public static class Sun
     {
-        public static DefaultState GetDefaultState(DateTime epoch)
+        public static DefaultState GetDefaultState(DateTime? epoch = null)
         {
-            DefaultState earthDefaultState = Earth.GetDefaultState(epoch);
-            earthDefaultState.CartesianCoordinates = new CartesianCoordinates();
-            CoordinateTransformations.ConvertKeplerianToCartesian(earthDefaultState.KeplerianCoordinates, earthDefaultState.CartesianCoordinates);
-            earthDefaultState.CartesianCoordinates.Negative();
-            CartesianCoordinates cartesianCoordinates = earthDefaultState.CartesianCoordinates;
-            cartesianCoordinates.Origin = Body.Earth;
-
-            return new DefaultState
+            CartesianCoordinates cartesianCoordinates = new CartesianCoordinates
             {
-                Epoch = epoch,
-                CoordinateType = CoordinateType.Cartesian,
-                CartesianCoordinates = cartesianCoordinates,
+                CoordinateFrame = Frame.EME2000,
+                Origin = Body.Earth,
             };
+            Coordinates coordinates = new Coordinates
+            {
+                Body = Body.Earth,
+                CartesianCoordinates = new List<CartesianCoordinates>
+                {
+                    cartesianCoordinates,
+                },
+            };
+            DefaultState defaultState = new DefaultState
+            {
+                CoordinateType = CoordinateType.Cartesian,
+                Coordinates = coordinates,
+            };
+            if (epoch == null)
+            {
+                return defaultState;
+            }
+            else
+            {
+                defaultState.Epoch = epoch;
+                DefaultState earthDefaultState = Earth.GetDefaultState(epoch);
+                CartesianCoordinates earth = new CartesianCoordinates
+                {
+                    Depth = CartesianDepth.Velocity,
+                };
+                CoordinateTransformations.ConvertKeplerianToCartesian(earthDefaultState.Coordinates.KeplerianCoordinates, earth);
+                earth.Negative();
+                cartesianCoordinates = earth;
+                cartesianCoordinates.Origin = Body.Earth;
+                defaultState.Coordinates.CartesianCoordinates = new List<CartesianCoordinates>
+                {
+                    cartesianCoordinates
+                };
+                return defaultState;
+            }
         }
     }
 }

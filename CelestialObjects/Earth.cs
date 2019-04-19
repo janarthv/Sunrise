@@ -9,20 +9,33 @@ namespace Sunrise.CelestialObjects
 {
     public static class Earth
     {
-        public static DefaultState GetDefaultState(DateTime epoch)
+        public static DefaultState GetDefaultState(DateTime? epoch = null)
         {
             KeplerianCoordinates keplerianCoordinates = new KeplerianCoordinates
             {
                 CoordinateFrame = Frame.EME2000,
-                Depth = KeplerianDepth.Exact,
+                Origin = Body.Sun,
             };
-            GetHelioCentricKeplerianElements(epoch, keplerianCoordinates);
-            return new DefaultState
+            Coordinates coordinates = new Coordinates
             {
-                Epoch = epoch,
-                CoordinateType = CoordinateType.Keplerian,
+                Body = Body.Sun,
                 KeplerianCoordinates = keplerianCoordinates,
             };
+            DefaultState defaultState = new DefaultState
+            {
+                CoordinateType = CoordinateType.Keplerian,
+                Coordinates = coordinates,
+            };
+            if (epoch == null)
+            {
+                return defaultState;
+            }
+            else
+            {
+                GetHelioCentricKeplerianElements(epoch.Value, keplerianCoordinates);
+                defaultState.Epoch = epoch.Value;
+                return defaultState;
+            }
         }
         public static void GetHelioCentricKeplerianElements(DateTime epoch, KeplerianCoordinates keplerianCoordinates)
         {            

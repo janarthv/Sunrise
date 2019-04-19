@@ -44,7 +44,7 @@ namespace Sunrise.CelestialObjects
             },            
         };
 
-        public static DefaultState GetDefaultState(Body body, DateTime epoch)
+        public static DefaultState GetDefaultState(Body body, DateTime? epoch = null)
         {
             if (body == Body.Sun)
             {
@@ -59,5 +59,7 @@ namespace Sunrise.CelestialObjects
                 throw new NotImplementedException();
             }
         }
+
+
     }
 }
