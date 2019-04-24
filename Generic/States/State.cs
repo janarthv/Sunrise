@@ -75,10 +75,16 @@ namespace Sunrise.Generic.States
                 throw new ArgumentNullException(errorMessage);
             }
 
-            if (CoordinatesSet == null || !CoordinatesSet.Any() || CoordinatesSet.Any( x => x == null))
+            if (CoordinatesSet == null || !CoordinatesSet.Any() || CoordinatesSet.Any( x => x == null || x.Body == null))
             {
                 errorMessage += "State coordinates";
                 throw new ArgumentNullException("State coordinates");
+            }
+
+            IEnumerable<Body> bodies = CoordinatesSet.Select(x => x.Body.Value);
+            if (bodies.Distinct().Count() != bodies.Count())
+            {
+                throw new ArgumentException("Coordinates set has 2 coordinates associated with same body ");
             }
         }
     }

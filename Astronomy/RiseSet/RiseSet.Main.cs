@@ -32,18 +32,18 @@ namespace Sunrise.Astronomy.RiseSet
             //{
             KeplerianCoordinates keplerianCoordinates = new KeplerianCoordinates
             {
-                Origin = Body.Sun,
+                Origin = Body.Earth,
                 CoordinateFrame = Frame.EME2000,
                 Depth = KeplerianDepth.PlaneOnly,
             };
             CoordinatesNeeded coordinatesNeeded = new CoordinatesNeeded
             {
-                Keplerian = false,
-                Cartesian = true,
+                Keplerian = true,
+                Cartesian = false,
             };
             CartesianCoordinates cartesianCoordinates = new CartesianCoordinates
             {
-                Origin = Body.Earth,
+                Origin = Body.Sun,
                 CoordinateFrame = Frame.EME2000,
             };
             CartesianCoordinates moonCartesianCoordinates = new CartesianCoordinates
@@ -60,21 +60,21 @@ namespace Sunrise.Astronomy.RiseSet
             {
                 Body = Body.Earth,
                 CoordinatesNeeded = coordinatesNeeded,
-                KeplerianCoordinates = null,
-                CartesianCoordinates = new List<CartesianCoordinates>
-                {
-                    cartesianCoordinates,
-                }
-            };
-            Coordinates sunCoordinates = new Coordinates
-            {
-                Body = Body.Sun,
-                CoordinatesNeeded = coordinatesNeeded,
                 KeplerianCoordinates = keplerianCoordinates,
                 //CartesianCoordinates = new List<CartesianCoordinates>
                 //{
                 //    cartesianCoordinates,
                 //}
+            };
+            Coordinates sunCoordinates = new Coordinates
+            {
+                Body = Body.Sun,
+                CoordinatesNeeded = coordinatesNeeded,
+                //KeplerianCoordinates = keplerianCoordinates,
+                CartesianCoordinates = new List<CartesianCoordinates>
+                {
+                    cartesianCoordinates,
+                }
             };
             Coordinates moonCoordinates = new Coordinates
             {
@@ -88,13 +88,13 @@ namespace Sunrise.Astronomy.RiseSet
             };
             List<Coordinates> coordinatesSet = new List<Coordinates>
             {
-                //earthCoordinates,
+                earthCoordinates,
                 //moonCoordinates,
-                sunCoordinates,
+                //sunCoordinates,
             };
             State state = new State
             {
-                Body = Body.Earth,
+                Body = Body.Sun,
                 Epoch = date,
                 CoordinatesSet = coordinatesSet,
             };

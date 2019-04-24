@@ -21,7 +21,7 @@ namespace Sunrise.Generic
 
     public interface IGenericDefaultMethods
     {
-        void CheckValidity(ValidityDepth? validityDepth = null);
+        void CheckSkeleton(ValidityDepth? validityDepth = null);
     }
 
     public interface ISpecificDefaultMethods
@@ -36,7 +36,6 @@ namespace Sunrise.Generic
 
     public enum ValidityDepth
     {
-        NullCheck,
         Origin,
         CoordinateFrame,
         CentreBody,
@@ -48,49 +47,28 @@ namespace Sunrise.Generic
         public Frame? CoordinateFrame { get; set; }
         public Body? Origin { get; set; }
 
-        public void CheckValidity(ValidityDepth? validityDepth = null)
+        public void CheckSkeleton(ValidityDepth? validityDepth = null)
         {
-            if (validityDepth == null)
+            if (this == null)
             {
-                validityDepth = ValidityDepth.NullCheck;
+                throw new ArgumentNullException();
             }
 
-            if (validityDepth <= ValidityDepth.NullCheck)
+            if (validityDepth == ValidityDepth.Origin)
             {
-                if (this == null)
-                {
-                    throw new ArgumentNullException();
-                }
-            }
-            else if (validityDepth <= ValidityDepth.Origin)
-            {
-                if (this == null)
-                {
-                    throw new ArgumentNullException();
-                }
-
                 if (Origin == null)
                 {
                     throw new ArgumentNullException();
                 }
             }
-            else if (validityDepth <= ValidityDepth.CoordinateFrame)
+            else if (validityDepth == ValidityDepth.CoordinateFrame)
             {
-                if (this == null)
-                {
-                    throw new ArgumentNullException();
-                }
-
-                if (Origin == null)
-                {
-                    throw new ArgumentNullException();
-                }
                 if (CoordinateFrame == null)
                 {
                     throw new ArgumentNullException();
                 }
             }
-            else
+            else if (validityDepth != null)
             {
                 throw new InvalidOperationException();
             }
@@ -131,7 +109,9 @@ namespace Sunrise.Generic
 
         public void CheckCoordinates()
         {
-            CheckValidity(ValidityDepth.CoordinateFrame);
+            CheckSkeleton(ValidityDepth.Origin);
+            CheckSkeleton(ValidityDepth.CoordinateFrame);
+
             if (IsValid != true || new List<double> { SMA, Ecc, Inc, RAAN }.Any(x => x == default(double)))
             {
                 throw new ArgumentNullException("Coordinates are not valid");
@@ -224,7 +204,9 @@ namespace Sunrise.Generic
 
         public void CheckCoordinates()
         {
-            CheckValidity(ValidityDepth.CoordinateFrame);
+            CheckSkeleton(ValidityDepth.Origin);
+            CheckSkeleton(ValidityDepth.CoordinateFrame);
+
             if (IsValid != true || Position == null)
             {
                 throw new ArgumentNullException("Coordinates are not valid");
@@ -263,7 +245,7 @@ namespace Sunrise.Generic
         public Body? CentreBody { get; set; }
         public Frame? BodyFrame { get; set; }
 
-        public void CheckValidity(ValidityDepth? validityDepth = null)
+        public void CheckSkeleton(ValidityDepth? validityDepth = null)
         {
             throw new NotImplementedException();
         }
@@ -294,13 +276,15 @@ namespace Sunrise.Generic
         {
             throw new NotImplementedException();
         }
+
+
     }
 
     public abstract class LocalCoordinates : GenericProperty, IGenericDefaultMethods
     {
         public Frame? LocalFrame { get; set; }
 
-        public void CheckValidity(ValidityDepth? validityDepth = null)
+        public void CheckSkeleton(ValidityDepth? validityDepth = null)
         {
             throw new NotImplementedException();
         }
@@ -339,9 +323,71 @@ namespace Sunrise.Generic
 
     public static class CoordinateTransformations
     {
+        internal static void ConvertCartesianFrame(CartesianCoordinates cartesianCoordinates1, CartesianCoordinates cartesianCoordinates2)
+        {
+            try
+            {
+                cartesianCoordinates1.CheckCoordinates();
+                cartesianCoordinates2.CheckSkeleton(ValidityDepth.CoordinateFrame);
+                if (cartesianCoordinates2.Depth > cartesianCoordinates1.Depth)
+                {
+                    throw new ArgumentException();
+                }
+            }
+            catch
+            {
+                throw new InvalidOperationException();
+            }
+
+            cartesianCoordinates2.IsValid = true;
+            cartesianCoordinates2.Origin = cartesianCoordinates1.Origin;
+
+            //FIXME
+            if (cartesianCoordinates1.CoordinateFrame != cartesianCoordinates2.CoordinateFrame)
+            {
+                throw new NotImplementedException();
+            }
+            else
+            {
+                cartesianCoordinates2.Position = cartesianCoordinates1.Position*10;
+                if (cartesianCoordinates2.Depth > CartesianDepth.Velocity)
+                {
+                    cartesianCoordinates2.Velocity = cartesianCoordinates1.Velocity*10;
+                }
+            }
+        }
+
         internal static void ConvertCartesianToKeplerian(CartesianCoordinates cartesianCoordinates, KeplerianCoordinates keplerianCoordinates)
         {
-            throw new NotImplementedException();
+            //FIXME
+            try
+            {
+                if (cartesianCoordinates.Depth < CartesianDepth.Velocity)
+                {
+                    throw new ArgumentException();
+                }
+                cartesianCoordinates.CheckCoordinates();
+            }
+            catch
+            {
+                throw new InvalidOperationException();
+            }
+
+            //FIXME
+            keplerianCoordinates.Origin = cartesianCoordinates.Origin;
+            keplerianCoordinates.CoordinateFrame = cartesianCoordinates.CoordinateFrame;
+            keplerianCoordinates.IsValid = true;
+
+            keplerianCoordinates.SMA = 1D;
+            keplerianCoordinates.Ecc = 1D;
+            keplerianCoordinates.Inc = 1D;
+            keplerianCoordinates.RAAN = 1D;
+
+            if (keplerianCoordinates.Depth >= KeplerianDepth.PlaneOnly)
+            {
+                keplerianCoordinates.ArgPer = 1D;
+                keplerianCoordinates.TrueAnom = 1D;
+            }
         }
 
         internal static void ConvertKeplerianFrame(KeplerianCoordinates keplerianCoordinates1, KeplerianCoordinates keplerianCoordinates2)
@@ -349,7 +395,7 @@ namespace Sunrise.Generic
             try
             {
                 keplerianCoordinates1.CheckCoordinates();
-                keplerianCoordinates2.CheckValidity(ValidityDepth.CoordinateFrame);
+                keplerianCoordinates2.CheckSkeleton(ValidityDepth.CoordinateFrame);
                 if (keplerianCoordinates2.Depth > keplerianCoordinates1.Depth)
                 {
                     throw new ArgumentOutOfRangeException();
@@ -361,21 +407,23 @@ namespace Sunrise.Generic
             }
 
             keplerianCoordinates2.IsValid = true;
+            keplerianCoordinates2.Origin = keplerianCoordinates1.Origin;
 
+            //FIXME
             if (keplerianCoordinates1.CoordinateFrame != keplerianCoordinates2.CoordinateFrame)
             {
                 throw new NotImplementedException();
             }
             else
             {
-                keplerianCoordinates2.SMA = keplerianCoordinates1.SMA;
-                keplerianCoordinates2.Ecc = keplerianCoordinates1.Ecc;
-                keplerianCoordinates2.Inc = keplerianCoordinates1.Inc;
-                keplerianCoordinates2.RAAN = keplerianCoordinates1.RAAN;
+                keplerianCoordinates2.SMA = keplerianCoordinates1.SMA*10;
+                keplerianCoordinates2.Ecc = keplerianCoordinates1.Ecc*10;
+                keplerianCoordinates2.Inc = keplerianCoordinates1.Inc * 10;
+                keplerianCoordinates2.RAAN = keplerianCoordinates1.RAAN * 10;
                 if (keplerianCoordinates2.Depth > KeplerianDepth.PlaneOnly)
                 {
-                    keplerianCoordinates2.ArgPer = keplerianCoordinates1.ArgPer;
-                    keplerianCoordinates2.TrueAnom = keplerianCoordinates1.TrueAnom;
+                    keplerianCoordinates2.ArgPer = keplerianCoordinates1.ArgPer * 10;
+                    keplerianCoordinates2.TrueAnom = keplerianCoordinates1.TrueAnom * 10;
                 }
             }
         }
@@ -384,6 +432,10 @@ namespace Sunrise.Generic
         {
             try
             {
+                if (keplerianCoordinates.Depth < KeplerianDepth.Exact)
+                {
+                    throw new ArgumentException();
+                }
                 keplerianCoordinates.CheckCoordinates();
             }
             catch
@@ -392,6 +444,7 @@ namespace Sunrise.Generic
             }
 
             //FIXME
+            cartesianCoordinates.IsValid = true;
             cartesianCoordinates.Origin = keplerianCoordinates.Origin;
             cartesianCoordinates.CoordinateFrame = keplerianCoordinates.CoordinateFrame;
 
@@ -402,108 +455,4 @@ namespace Sunrise.Generic
             }
         }
     }
-
-    //public class Coordinates
-    //{
-    //    public Body? Body { get; set; }
-    //    public KeplerianCoordinates KeplerianCoordinates { get; set; }
-    //    public IEnumerable<CartesianCoordinates> CartesianCoordinates { get; set; }
-    //    public BodyCentricCoordinates BodyCentricCoordinates { get; set; }
-    //    public IEnumerable<TopoCentricCoordinates> TopoCentricCoordinates { get; set; }
-
-    //    //internal void ConvertKeplerianToCartesian()
-    //    //{
-    //    //    try
-    //    //    {
-    //    //        CheckKeplerianCoordinatesValidity();
-    //    //        CheckCartesianCoordinatesValidity();
-    //    //    }
-    //    //    catch
-    //    //    {
-    //    //        throw new InvalidOperationException();
-    //    //    }
-    //    //    if (KeplerianCoordinates.CoordinateFrame != CartesianCoordinates.CoordinateFrame || KeplerianCoordinates.Origin == null)
-    //    //    {
-    //    //        throw new InvalidOperationException();
-    //    //    }
-
-    //    //    //FIXME
-    //    //    CartesianCoordinates = new CartesianCoordinates
-    //    //    {
-    //    //        Origin = KeplerianCoordinates.Origin,
-    //    //        CoordinateFrame = KeplerianCoordinates.CoordinateFrame,
-    //    //        Position = Vector<double>.Build.Random(3),
-    //    //        Velocity = Vector<double>.Build.Random(3),
-    //    //    };
-    //    //}
-
-    //    //private void CheckCartesianCoordinatesValidity()
-    //    //{
-    //    //    if (CartesianCoordinates == null || CartesianCoordinates.CoordinateFrame == null)
-    //    //    {
-    //    //        throw new ArgumentNullException();
-    //    //    }
-    //    //}
-
-    //    //private void CheckKeplerianCoordinatesValidity()
-    //    //{
-    //    //    if (KeplerianCoordinates == null || KeplerianCoordinates.CoordinateFrame == null)
-    //    //    {
-    //    //        throw new ArgumentNullException();
-    //    //    }
-    //    //}
-
-    //    //public void CheckValidity()
-    //    //{
-    //    //    string errorMessage = "Coordinates.CheckValidity():";
-    //    //    if (Type == CoordinateType.Keplerian)
-    //    //    {
-    //    //        try
-    //    //        {
-    //    //            KeplerianCoordinates.CheckValidity();
-    //    //        }
-    //    //        catch
-    //    //        {
-    //    //            errorMessage += "Invalid Keplerian coordinates";
-    //    //            throw new ArgumentException(errorMessage);
-    //    //        }
-    //    //    }
-    //    //    else if (Type == CoordinateType.Cartesian)
-    //    //    {
-    //    //        try
-    //    //        {
-    //    //            CartesianCoordinates.CheckValidity();
-    //    //        }
-    //    //        catch
-    //    //        {
-    //    //            errorMessage += "Invalid Cartesian coordinates";
-    //    //            throw new ArgumentException(errorMessage);
-    //    //        }
-    //    //    }
-    //    //    else if (Type == CoordinateType.BodyCentric)
-    //    //    {
-    //    //        try
-    //    //        {
-    //    //            BodyCentricCoordinates.CheckValidity();
-    //    //        }
-    //    //        catch
-    //    //        {
-    //    //            errorMessage += "Invalid BodyCentric coordinates";
-    //    //            throw new ArgumentException(errorMessage);
-    //    //        }
-    //    //    }
-    //    //    else if (Type == CoordinateType.TopoCentric)
-    //    //    {
-    //    //        try
-    //    //        {
-    //    //            TopoCentricCoordinates.CheckValidity();
-    //    //        }
-    //    //        catch
-    //    //        {
-    //    //            errorMessage += "Invalid TopoCentric coordinates";
-    //    //            throw new ArgumentException(errorMessage);
-    //    //        }
-    //    //    }
-    //    //}
-    //}
 }
