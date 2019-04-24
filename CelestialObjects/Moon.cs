@@ -15,6 +15,7 @@ namespace Sunrise.CelestialObjects
             {
                 CoordinateFrame = Frame.EME2000,
                 Origin = Body.Earth,
+                Depth = KeplerianDepth.Exact,
             };
             Coordinates coordinates = new Coordinates
             {
@@ -28,7 +29,7 @@ namespace Sunrise.CelestialObjects
             };
             if (epoch == null)
             {
-                return defaultState;
+                return defaultState; //FIXME
             }
             else
             {
@@ -53,17 +54,22 @@ namespace Sunrise.CelestialObjects
                     Inc = BasicMath.DegreeToRadian(0.00005),
                     RAAN = BasicMath.DegreeToRadian(-11.26064),
                     ArgPer = BasicMath.DegreeToRadian(102.94719),
-                    TA = BasicMath.DegreeToRadian(100.46435),
+                    TrueAnom = BasicMath.DegreeToRadian(100.46435),
                     Origin = Body.Earth,
                     CoordinateFrame = Frame.EME2000,
                 };
+                keplerianCoordinates.Origin = dummy.Origin;
+                keplerianCoordinates.IsValid = true;
                 keplerianCoordinates.SMA = dummy.SMA;
                 keplerianCoordinates.Ecc = dummy.Ecc;
                 keplerianCoordinates.Inc = dummy.Inc;
                 keplerianCoordinates.RAAN = dummy.RAAN;
-                keplerianCoordinates.ArgPer = dummy.ArgPer;
-                keplerianCoordinates.TA = dummy.TA;
-                keplerianCoordinates.Origin = dummy.Origin;
+
+                if (keplerianCoordinates.Depth > KeplerianDepth.PlaneOnly)
+                {
+                    keplerianCoordinates.ArgPer = dummy.ArgPer;
+                    keplerianCoordinates.TrueAnom = dummy.TrueAnom;
+                }
             }
             else
             {

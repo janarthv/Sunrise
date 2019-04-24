@@ -15,7 +15,7 @@ namespace Sunrise.Generic.States
 
     public static partial class StateRetriever
     {
-        private static Dictionary<Body, DefaultState> bodyDefaultStates = new Dictionary<Body, DefaultState>();
+        private static Dictionary<Body, DefaultState> defaultStates = new Dictionary<Body, DefaultState>();
          
         public static void GetState(State state)
         {
@@ -26,8 +26,9 @@ namespace Sunrise.Generic.States
             state.CheckValidity();
 
             Body body = state.Body.Value;
-            DefaultState bodyDefaultState = CelestialBodies.GetDefaultState(body);
-            bodyDefaultStates.Add(body, bodyDefaultState);
+            DateTime epoch = state.Epoch;
+            DefaultState bodyDefaultState = CelestialBodies.GetDefaultState(body,epoch);
+            defaultStates.Add(body, bodyDefaultState);
 
             foreach (Coordinates coordinates in state.CoordinatesSet)
             {
@@ -46,7 +47,7 @@ namespace Sunrise.Generic.States
                 if (bodyDefaultState.Coordinates.Body != origin)
                 {
                     originDefaultState = CelestialBodies.GetDefaultState(origin);
-                    bodyDefaultStates.Add(origin, originDefaultState);
+                    defaultStates.Add(origin, originDefaultState);
                 }
 
                 CoordinatesNeeded coordinatesNeeded = coordinates.CoordinatesNeeded;
@@ -58,7 +59,15 @@ namespace Sunrise.Generic.States
                     {
                         if (bodyDefaultState.CoordinateType == CoordinateType.Keplerian)
                         {
-                            CoordinateTransformations.ConvertKeplerianFrame(bodyDefaultState.Coordinates.KeplerianCoordinates,coordinates.KeplerianCoordinates);
+                            CoordinateTransformations.ConvertKeplerianFrame(bodyDefaultState.Coordinates.KeplerianCoordinates, coordinates.KeplerianCoordinates);
+                        }
+                        else if (bodyDefaultState.CoordinateType == CoordinateType.Cartesian)
+                        {
+                            CoordinateTransformations.ConvertCartesianToKeplerian(bodyDefaultState.Coordinates.CartesianCoordinates.First(),coordinates.KeplerianCoordinates);
+                        }
+                        else
+                        {
+                            throw new NotImplementedException();
                         }
                     }
                     //Sun-Earth
@@ -94,7 +103,7 @@ namespace Sunrise.Generic.States
                                             dummyCartesianCoordinates,
                                         }
                             };
-                            GetHelioCentricState(State.Epoch, dummyCoordinates);
+                            GetHelioCentricState(state.Epoch, dummyCoordinates);
                             dummyCartesianCoordinates.Negative(); //BETTERME
                             cartesianCoordinates.Position = dummyCartesianCoordinates.Position;
                             if (cartesianCoordinates.Depth >= CartesianDepth.Velocity)

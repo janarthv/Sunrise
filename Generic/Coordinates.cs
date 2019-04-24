@@ -19,15 +19,82 @@ namespace Sunrise.Generic
         TopoCentric,
     }
 
+    public interface IGenericDefaultMethods
+    {
+        void CheckValidity(ValidityDepth? validityDepth = null);
+    }
+
+    public interface ISpecificDefaultMethods
+    {
+        void CheckCoordinates();
+    }
+
     public abstract class GenericProperty
     {
         public bool IsValid { get; set; }
     }
 
-    public abstract class BasicCoordinates : GenericProperty
+    public enum ValidityDepth
+    {
+        NullCheck,
+        Origin,
+        CoordinateFrame,
+        CentreBody,
+        BodyFrame,
+    }
+
+    public abstract class BasicCoordinates : GenericProperty, IGenericDefaultMethods
     {
         public Frame? CoordinateFrame { get; set; }
         public Body? Origin { get; set; }
+
+        public void CheckValidity(ValidityDepth? validityDepth = null)
+        {
+            if (validityDepth == null)
+            {
+                validityDepth = ValidityDepth.NullCheck;
+            }
+
+            if (validityDepth <= ValidityDepth.NullCheck)
+            {
+                if (this == null)
+                {
+                    throw new ArgumentNullException();
+                }
+            }
+            else if (validityDepth <= ValidityDepth.Origin)
+            {
+                if (this == null)
+                {
+                    throw new ArgumentNullException();
+                }
+
+                if (Origin == null)
+                {
+                    throw new ArgumentNullException();
+                }
+            }
+            else if (validityDepth <= ValidityDepth.CoordinateFrame)
+            {
+                if (this == null)
+                {
+                    throw new ArgumentNullException();
+                }
+
+                if (Origin == null)
+                {
+                    throw new ArgumentNullException();
+                }
+                if (CoordinateFrame == null)
+                {
+                    throw new ArgumentNullException();
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException();
+            }
+        }
     }
 
     public enum KeplerianDepth
@@ -36,35 +103,47 @@ namespace Sunrise.Generic
         Exact,
     }
 
-    public class KeplerianCoordinates : BasicCoordinates
+    public class KeplerianCoordinates : BasicCoordinates, ISpecificDefaultMethods
     {
         public double SMA { get; set; }
         public double Ecc { get; set; }
         public double Inc { get; set; }
         public double RAAN { get; set; }
         public double ArgPer { get; set; }
-        public double TA { get; set; }
+        public double TrueAnom { get; set; }
         public KeplerianDepth Depth { get; set; }
 
         public KeplerianCoordinates()
         {
         }
 
-        public KeplerianCoordinates(double sma, double ecc, double inc, double raan, double argPer, double ta, Frame frame, Body origin)
+        public KeplerianCoordinates(double sma, double ecc, double inc, double raan, double argPer, double trueAnom, Frame frame, Body origin)
         {
             SMA = sma;
             Ecc = ecc;
             Inc = inc;
             RAAN = raan;
             ArgPer = argPer;
-            TA = ta;
+            TrueAnom = trueAnom;
             CoordinateFrame = frame;
             Origin = origin;
         }
 
-        internal void CheckValidity()
+        public void CheckCoordinates()
         {
-            throw new NotImplementedException();
+            CheckValidity(ValidityDepth.CoordinateFrame);
+            if (IsValid != true || new List<double> { SMA, Ecc, Inc, RAAN }.Any(x => x == default(double)))
+            {
+                throw new ArgumentNullException("Coordinates are not valid");
+            }
+
+            if (Depth > KeplerianDepth.PlaneOnly)
+            {
+                if (new List<double> { ArgPer, TrueAnom }.Any(x => x == default(double)))
+                {
+                    throw new ArgumentNullException("Coordinates are not valid");
+                }
+            }
         }
     }
 
@@ -75,7 +154,7 @@ namespace Sunrise.Generic
         Acceleration,
     }
 
-    public class CartesianCoordinates : BasicCoordinates
+    public class CartesianCoordinates : BasicCoordinates, ISpecificDefaultMethods
     {
         public CartesianDepth Depth { get; set; }
         private Vector<double> _pos;
@@ -131,11 +210,6 @@ namespace Sunrise.Generic
             Depth = depth;
         }
 
-        internal void CheckValidity()
-        {
-            throw new NotImplementedException();
-        }
-
         public void Negative()
         {
             if (_pos != null)
@@ -145,6 +219,23 @@ namespace Sunrise.Generic
             if (_vel != null)
             {
                 _vel = -_vel;
+            }
+        }
+
+        public void CheckCoordinates()
+        {
+            CheckValidity(ValidityDepth.CoordinateFrame);
+            if (IsValid != true || Position == null)
+            {
+                throw new ArgumentNullException("Coordinates are not valid");
+            }
+
+            if (Depth > CartesianDepth.Position)
+            {
+                if (Velocity == null)
+                {
+                    throw new ArgumentNullException("Coordinates are not valid");
+                }
             }
         }
     }
@@ -167,13 +258,18 @@ namespace Sunrise.Generic
         }
     }
 
-    public abstract class BodyCoordinates : GenericProperty
+    public abstract class BodyCoordinates : GenericProperty, IGenericDefaultMethods
     {
         public Body? CentreBody { get; set; }
         public Frame? BodyFrame { get; set; }
+
+        public void CheckValidity(ValidityDepth? validityDepth = null)
+        {
+            throw new NotImplementedException();
+        }
     }
 
-    public class BodyCentricCoordinates : BodyCoordinates
+    public class BodyCentricCoordinates : BodyCoordinates, ISpecificDefaultMethods
     {
         public LatLon LatLon { get; set; }
         public double Altitude { get; set; }
@@ -193,14 +289,24 @@ namespace Sunrise.Generic
         {
             throw new NotImplementedException();
         }
+
+        public void CheckCoordinates()
+        {
+            throw new NotImplementedException();
+        }
     }
 
-    public abstract class LocalCoordinates : GenericProperty
+    public abstract class LocalCoordinates : GenericProperty, IGenericDefaultMethods
     {
         public Frame? LocalFrame { get; set; }
+
+        public void CheckValidity(ValidityDepth? validityDepth = null)
+        {
+            throw new NotImplementedException();
+        }
     }
 
-    public class TopoCentricCoordinates : LocalCoordinates
+    public class TopoCentricCoordinates : LocalCoordinates, ISpecificDefaultMethods
     {
         public BodyCentricCoordinates Location { get; set; }
         public double Azimuth { get; set; }
@@ -224,21 +330,61 @@ namespace Sunrise.Generic
         {
             throw new NotImplementedException();
         }
+
+        public void CheckCoordinates()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public static class CoordinateTransformations
     {
-        internal static void ConvertKeplerianFrame(KeplerianCoordinates keplerianCoordinates1, KeplerianCoordinates keplerianCoordinates2)
+        internal static void ConvertCartesianToKeplerian(CartesianCoordinates cartesianCoordinates, KeplerianCoordinates keplerianCoordinates)
         {
             throw new NotImplementedException();
+        }
+
+        internal static void ConvertKeplerianFrame(KeplerianCoordinates keplerianCoordinates1, KeplerianCoordinates keplerianCoordinates2)
+        {
+            try
+            {
+                keplerianCoordinates1.CheckCoordinates();
+                keplerianCoordinates2.CheckValidity(ValidityDepth.CoordinateFrame);
+                if (keplerianCoordinates2.Depth > keplerianCoordinates1.Depth)
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+            }
+            catch
+            {
+                throw new InvalidOperationException();
+            }
+
+            keplerianCoordinates2.IsValid = true;
+
+            if (keplerianCoordinates1.CoordinateFrame != keplerianCoordinates2.CoordinateFrame)
+            {
+                throw new NotImplementedException();
+            }
+            else
+            {
+                keplerianCoordinates2.SMA = keplerianCoordinates1.SMA;
+                keplerianCoordinates2.Ecc = keplerianCoordinates1.Ecc;
+                keplerianCoordinates2.Inc = keplerianCoordinates1.Inc;
+                keplerianCoordinates2.RAAN = keplerianCoordinates1.RAAN;
+                if (keplerianCoordinates2.Depth > KeplerianDepth.PlaneOnly)
+                {
+                    keplerianCoordinates2.ArgPer = keplerianCoordinates1.ArgPer;
+                    keplerianCoordinates2.TrueAnom = keplerianCoordinates1.TrueAnom;
+                }
+            }
         }
 
         internal static void ConvertKeplerianToCartesian(KeplerianCoordinates keplerianCoordinates, CartesianCoordinates cartesianCoordinates)
         {
             try
             {
-                CheckKeplerianCoordinatesValidity(keplerianCoordinates);
-                CheckCartesianCoordinatesValidity(cartesianCoordinates);
+                keplerianCoordinates.CheckCoordinates();
             }
             catch
             {
@@ -253,22 +399,6 @@ namespace Sunrise.Generic
             if (cartesianCoordinates.Depth >= CartesianDepth.Velocity)
             {
                 cartesianCoordinates.Velocity = Vector<double>.Build.Random(3);
-            }
-        }
-
-        private static void CheckCartesianCoordinatesValidity(CartesianCoordinates cartesianCoordinates)
-        {
-            if (cartesianCoordinates == null)
-            {
-                throw new ArgumentNullException();
-            }
-        }
-
-        private static void CheckKeplerianCoordinatesValidity(KeplerianCoordinates keplerianCoordinates)
-        {
-            if (keplerianCoordinates == null)
-            {
-                throw new ArgumentNullException();
             }
         }
     }

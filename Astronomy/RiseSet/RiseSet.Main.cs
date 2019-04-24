@@ -32,12 +32,13 @@ namespace Sunrise.Astronomy.RiseSet
             //{
             KeplerianCoordinates keplerianCoordinates = new KeplerianCoordinates
             {
-                Origin = Body.Earth,
+                Origin = Body.Sun,
                 CoordinateFrame = Frame.EME2000,
+                Depth = KeplerianDepth.PlaneOnly,
             };
             CoordinatesNeeded coordinatesNeeded = new CoordinatesNeeded
             {
-                Keplerian = true,
+                Keplerian = false,
                 Cartesian = true,
             };
             CartesianCoordinates cartesianCoordinates = new CartesianCoordinates
@@ -65,6 +66,16 @@ namespace Sunrise.Astronomy.RiseSet
                     cartesianCoordinates,
                 }
             };
+            Coordinates sunCoordinates = new Coordinates
+            {
+                Body = Body.Sun,
+                CoordinatesNeeded = coordinatesNeeded,
+                KeplerianCoordinates = keplerianCoordinates,
+                //CartesianCoordinates = new List<CartesianCoordinates>
+                //{
+                //    cartesianCoordinates,
+                //}
+            };
             Coordinates moonCoordinates = new Coordinates
             {
                 Body = Body.Moon,
@@ -77,19 +88,17 @@ namespace Sunrise.Astronomy.RiseSet
             };
             List<Coordinates> coordinatesSet = new List<Coordinates>
             {
-                earthCoordinates,
-                moonCoordinates,
+                //earthCoordinates,
+                //moonCoordinates,
+                sunCoordinates,
             };
-            StateRetriever stateRetriever = new StateRetriever
+            State state = new State
             {
-                CoordinatesNeeded = coordinatesNeeded,
-                State = new State
-                {
-                    Body = Body.Sun,
-                    Epoch = date,
-                    CoordinatesSet = coordinatesSet,
-                },
+                Body = Body.Earth,
+                Epoch = date,
+                CoordinatesSet = coordinatesSet,
             };
+
             //Earth.GetHelioCentricKeplerianElements(date, keplerianCoordinates);
             //keplerianCoordinates.ArgPer = 0;
             //keplerianCoordinates.Origin = null;
@@ -97,11 +106,11 @@ namespace Sunrise.Astronomy.RiseSet
             //Start testing this one
             //coordinates.KeplerianCoordinates = null;
             //StateRetriever.GetHelioCentricState(date, moonCoordinates);
-            //stateRetriever.GetState();
-            DefaultState defaultState = Sun.GetDefaultState();
-            defaultState = null;
-            defaultState = Earth.GetDefaultState(date);
-            defaultState = CelestialBodies.GetDefaultState(Body.Sun, date);
+            StateRetriever.GetState(state);
+            //DefaultState defaultState = Sun.GetDefaultState();
+            //defaultState = null;
+            //defaultState = Earth.GetDefaultState(date);
+            //defaultState = CelestialBodies.GetDefaultState(Body.Sun, date);
             //stateRetriever.GetBodyCentricState();
             //stateRetriever.GetHelioCentricState(Depth.Position);
             //State bodyState = new State

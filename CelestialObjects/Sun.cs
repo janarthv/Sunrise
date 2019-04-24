@@ -39,19 +39,19 @@ namespace Sunrise.CelestialObjects
             };
             if (epoch == null)
             {
-                return defaultState;
+                return defaultState; //FIXME
             }
             else
             {
                 defaultState.Epoch = epoch;
                 DefaultState earthDefaultState = Earth.GetDefaultState(epoch);
-                CartesianCoordinates earth = new CartesianCoordinates
+                CartesianCoordinates earthCartesian = new CartesianCoordinates
                 {
                     Depth = CartesianDepth.Velocity,
                 };
-                CoordinateTransformations.ConvertKeplerianToCartesian(earthDefaultState.Coordinates.KeplerianCoordinates, earth);
-                earth.Negative();
-                cartesianCoordinates = earth;
+                CoordinateTransformations.ConvertKeplerianToCartesian(earthDefaultState.Coordinates.KeplerianCoordinates, earthCartesian);
+                earthCartesian.Negative();
+                cartesianCoordinates = earthCartesian;
                 cartesianCoordinates.Origin = Body.Earth;
                 defaultState.Coordinates.CartesianCoordinates = new List<CartesianCoordinates>
                 {
